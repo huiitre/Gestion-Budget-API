@@ -41,7 +41,7 @@ class Category
 
     /**
      * @ORM\OneToMany(targetEntity=Subcategory::class, mappedBy="category", orphanRemoval=true)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories"})
      */
     private $subcategories;
 
