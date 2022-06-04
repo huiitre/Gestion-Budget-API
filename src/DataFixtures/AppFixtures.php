@@ -14,14 +14,18 @@ use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ObjectManager;
 use App\DataFixtures\Providers\TransactionProvider;
+use App\Entity\User;
 
 class AppFixtures extends Fixture
 {
     private $connexion;
 
-    public function __construct(Connection $connexion)
+    private $hasher;
+
+    public function __construct(Connection $connexion, UserPasswordHasherInterface $hasher)
     {
         $this->connexion = $connexion;
+        $this->hasher = $hasher;
     }
 
     private function truncate()
@@ -31,6 +35,7 @@ class AppFixtures extends Fixture
         $this->connexion->executeQuery('TRUNCATE TABLE category');
         $this->connexion->executeQuery('TRUNCATE TABLE subcategory');
         $this->connexion->executeQuery('TRUNCATE TABLE transaction');
+        // $this->connexion->executeQuery('TRUNCATE TABLE user');
     }
 
     public function load(ObjectManager $manager)
@@ -41,6 +46,7 @@ class AppFixtures extends Fixture
 
         $faker = Faker::create('fr_FR');
 
+        
         /**
          *! Ajout des catégories
          */
@@ -65,6 +71,7 @@ class AppFixtures extends Fixture
 
             $manager->persist($category);
         }
+
 
         /**
          *! Ajout des transactions
@@ -98,6 +105,40 @@ class AppFixtures extends Fixture
             $transaction->setSubcategory($allEntitySubcategories[mt_rand(0, 111)]);
 
             $manager->persist($transaction);
+        }
+
+
+        /**
+         *! Ajout des utilisateurs
+         */
+        $dataUsers = [
+            [
+                'username' => 'Yanis',
+                'mail' => 'a@a.fr',
+                'password' => '123456',
+            ],
+            [
+                'username' => 'Audrey',
+                'mail' => 'b@b.fr',
+                'password' => '123456',
+            ],
+            [
+                'username' => 'huiitre',
+                'mail' => 'c@c.fr',
+                'password' => '123456',
+            ],
+        ];
+        foreach ($dataUsers as $value) {
+            $user = new User();
+            $user->setUsername($value['username']);
+            $user->setEmail($value['mail']);
+            $hashedPassword = $this->hasher->hashPassword(
+                $user,
+                $value['password']
+            );
+            $user->setPassword($hashedPassword);
+
+            $manager->persist($user);
         }
 
         $manager->flush();
