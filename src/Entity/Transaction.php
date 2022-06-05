@@ -15,55 +15,55 @@ class Transaction
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $wording;
 
     /**
      * @ORM\Column(type="float")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $balance;
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $credited_at;
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $debited_at;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $is_fixed;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $is_seen;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $is_active;
 
@@ -72,9 +72,15 @@ class Transaction
      * ? la sous catégorie de la transaction
      * @ORM\ManyToOne(targetEntity=Subcategory::class, inversedBy="transactions")
      * @ORM\JoinColumn(nullable=false)
-     * @Groups({"get_transactions"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $subcategory;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="transactions")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
 
     public function getId(): ?int
     {
@@ -185,6 +191,18 @@ class Transaction
     public function setSubcategory(?Subcategory $subcategory): self
     {
         $this->subcategory = $subcategory;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

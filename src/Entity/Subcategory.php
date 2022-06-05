@@ -17,25 +17,25 @@ class Subcategory
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $name;
 
     /**
      * @ORM\Column(type="datetime_immutable")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $created_at;
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $updated_at;
 

@@ -35,7 +35,7 @@ class AppFixtures extends Fixture
         $this->connexion->executeQuery('TRUNCATE TABLE category');
         $this->connexion->executeQuery('TRUNCATE TABLE subcategory');
         $this->connexion->executeQuery('TRUNCATE TABLE transaction');
-        // $this->connexion->executeQuery('TRUNCATE TABLE user');
+        $this->connexion->executeQuery('TRUNCATE TABLE user');
     }
 
     public function load(ObjectManager $manager)
@@ -45,6 +45,43 @@ class AppFixtures extends Fixture
         $this->truncate();
 
         $faker = Faker::create('fr_FR');
+
+
+        /**
+         *! Ajout des utilisateurs
+         */
+        $allEntityUsers = [];
+        $dataUsers = [
+            [
+                'username' => 'Yanis',
+                'mail' => 'a@a.fr',
+                'password' => '123456',
+            ],
+            [
+                'username' => 'Audrey',
+                'mail' => 'b@b.fr',
+                'password' => '123456',
+            ],
+            [
+                'username' => 'huiitre',
+                'mail' => 'c@c.fr',
+                'password' => '123456',
+            ],
+        ];
+        foreach ($dataUsers as $value) {
+            $user = new User();
+            $user->setUsername($value['username']);
+            $user->setEmail($value['mail']);
+            $hashedPassword = $this->hasher->hashPassword(
+                $user,
+                $value['password']
+            );
+            $user->setPassword($hashedPassword);
+
+            $allEntityUsers[] = $user;
+
+            $manager->persist($user);
+        }
 
         
         /**
@@ -76,6 +113,7 @@ class AppFixtures extends Fixture
         /**
          *! Ajout des transactions
          */
+
         $transactionProvider = new TransactionProvider();
 
         //* ajout du salaire à la mano
@@ -88,6 +126,8 @@ class AppFixtures extends Fixture
         $salaire->setIsSeen(true);
         $salaire->setIsActive(true);
         $salaire->setSubcategory($allEntitySubcategories[112]);
+
+        $salaire->setUser($allEntityUsers[0]);
 
         $manager->persist($salaire);
 
@@ -104,41 +144,9 @@ class AppFixtures extends Fixture
             $transaction->setIsActive($transactionProvider->getIsActive()[$i]);
             $transaction->setSubcategory($allEntitySubcategories[mt_rand(0, 111)]);
 
+            $transaction->setUser($allEntityUsers[mt_rand(0, 2)]);
+
             $manager->persist($transaction);
-        }
-
-
-        /**
-         *! Ajout des utilisateurs
-         */
-        $dataUsers = [
-            [
-                'username' => 'Yanis',
-                'mail' => 'a@a.fr',
-                'password' => '123456',
-            ],
-            [
-                'username' => 'Audrey',
-                'mail' => 'b@b.fr',
-                'password' => '123456',
-            ],
-            [
-                'username' => 'huiitre',
-                'mail' => 'c@c.fr',
-                'password' => '123456',
-            ],
-        ];
-        foreach ($dataUsers as $value) {
-            $user = new User();
-            $user->setUsername($value['username']);
-            $user->setEmail($value['mail']);
-            $hashedPassword = $this->hasher->hashPassword(
-                $user,
-                $value['password']
-            );
-            $user->setPassword($hashedPassword);
-
-            $manager->persist($user);
         }
 
         $manager->flush();
