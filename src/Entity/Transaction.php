@@ -82,6 +82,31 @@ class Transaction
      */
     private $user;
 
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     * @Groups({"get_categories", "get_transactions", "get_users"})
+     */
+    private $created_at;
+
+    /**
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     * @Groups({"get_categories", "get_transactions", "get_users"})
+     */
+    private $updated_at;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=Month::class, inversedBy="transactions")
+     * @ORM\JoinColumn(nullable=false)
+     * @Groups({"get_users", "get_transactions", "get_categories"})
+     */
+    private $month;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Groups({"get_categories", "get_transactions", "get_users"})
+     */
+    private $slug;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -203,6 +228,54 @@ class Transaction
     public function setUser(?User $user): self
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $created_at): self
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updated_at): self
+    {
+        $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
+    public function getMonth(): ?Month
+    {
+        return $this->month;
+    }
+
+    public function setMonth(?Month $month): self
+    {
+        $this->month = $month;
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
 
         return $this;
     }

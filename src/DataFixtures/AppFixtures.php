@@ -14,18 +14,20 @@ use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ObjectManager;
 use App\DataFixtures\Providers\TransactionProvider;
+use App\Entity\Month;
 use App\Entity\User;
 
 class AppFixtures extends Fixture
 {
     private $connexion;
-
     private $hasher;
+    private $slugger;
 
-    public function __construct(Connection $connexion, UserPasswordHasherInterface $hasher)
+    public function __construct(Connection $connexion, UserPasswordHasherInterface $hasher, MySlugger $mySlugger)
     {
         $this->connexion = $connexion;
         $this->hasher = $hasher;
+        $this->slugger = $mySlugger;
     }
 
     private function truncate()
@@ -36,6 +38,7 @@ class AppFixtures extends Fixture
         $this->connexion->executeQuery('TRUNCATE TABLE subcategory');
         $this->connexion->executeQuery('TRUNCATE TABLE transaction');
         $this->connexion->executeQuery('TRUNCATE TABLE user');
+        $this->connexion->executeQuery('TRUNCATE TABLE month');
     }
 
     public function load(ObjectManager $manager)
@@ -45,6 +48,38 @@ class AppFixtures extends Fixture
         $this->truncate();
 
         $faker = Faker::create('fr_FR');
+
+        $now = new DateTimeImmutable('now');
+
+
+        /**
+         * ! Ajout des mois
+         */
+        $allEntityMonths = [];
+        $months = [
+            'Janvier',
+            'Février',
+            'Mars',
+            'Avril',
+            'Mai',
+            'Juin',
+            'Juillet',
+            'Août',
+            'Septembre',
+            'Octobre',
+            'Novembre',
+            'Décembre',
+        ];
+
+        foreach ($months as $value) {
+            $month = new Month();
+            $month->setName($value);
+            $month->setSlug($this->slugger->slugify($value));
+
+            $allEntityMonths[] = $month;
+
+            $manager->persist($month);
+        }
 
 
         /**
@@ -92,12 +127,13 @@ class AppFixtures extends Fixture
 
             $category = new Category();
             $category->setName($key);
-            $now = new DateTimeImmutable('now');
+            $category->setSlug($this->slugger->slugify($key));
             $category->setCreatedAt($now);
 
             foreach ($value as $val) {
                 $subCategory = new Subcategory();
                 $subCategory->setName($val);
+                $subCategory->setSlug($this->slugger->slugify($val));
                 $subCategory->setCreatedAt($now);
 
                 $allEntitySubcategories[] = $subCategory;
@@ -125,9 +161,12 @@ class AppFixtures extends Fixture
         $salaire->setIsFixed(true);
         $salaire->setIsSeen(true);
         $salaire->setIsActive(true);
-        $salaire->setSubcategory($allEntitySubcategories[112]);
+        $salaire->setSlug($this->slugger->slugify('Salaire Distrilog'));
+        $salaire->setCreatedAt($now);
 
+        $salaire->setSubcategory($allEntitySubcategories[112]);
         $salaire->setUser($allEntityUsers[0]);
+        $salaire->setMonth($allEntityMonths[2]);
 
         $manager->persist($salaire);
 
@@ -142,9 +181,12 @@ class AppFixtures extends Fixture
             $transaction->setIsFixed($transactionProvider->getIsFixed()[$i]);
             $transaction->setIsSeen($transactionProvider->getIsSeen()[$i]);
             $transaction->setIsActive($transactionProvider->getIsActive()[$i]);
-            $transaction->setSubcategory($allEntitySubcategories[mt_rand(0, 111)]);
+            $transaction->setSlug($this->slugger->slugify($transactionProvider->getName()[$i]));
+            $transaction->setCreatedAt($now);
 
+            $transaction->setSubcategory($allEntitySubcategories[mt_rand(0, 111)]);
             $transaction->setUser($allEntityUsers[mt_rand(0, 2)]);
+            $transaction->setMonth($allEntityMonths[2]);
 
             $manager->persist($transaction);
         }
