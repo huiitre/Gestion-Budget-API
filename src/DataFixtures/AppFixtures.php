@@ -22,12 +22,14 @@ class AppFixtures extends Fixture
     private $connexion;
     private $hasher;
     private $slugger;
+    private $sluggerInterface;
 
-    public function __construct(Connection $connexion, UserPasswordHasherInterface $hasher, MySlugger $mySlugger)
+    public function __construct(Connection $connexion, UserPasswordHasherInterface $hasher, MySlugger $mySlugger, SluggerInterface $sluggerInterface)
     {
         $this->connexion = $connexion;
         $this->hasher = $hasher;
         $this->slugger = $mySlugger;
+        $this->sluggerInterface = $sluggerInterface;
     }
 
     private function truncate()
@@ -56,25 +58,14 @@ class AppFixtures extends Fixture
          * ! Ajout des mois
          */
         $allEntityMonths = [];
-        $months = [
-            'Janvier',
-            'Février',
-            'Mars',
-            'Avril',
-            'Mai',
-            'Juin',
-            'Juillet',
-            'Août',
-            'Septembre',
-            'Octobre',
-            'Novembre',
-            'Décembre',
-        ];
 
         foreach ($months as $value) {
             $month = new Month();
-            $month->setName($value);
-            $month->setSlug($this->slugger->slugify($value));
+
+            $month->setName($value['name']);
+            // $month->setSlug($this->slugger->slugify($value['name']));
+            $month->setSlug($this->sluggerInterface->slug($value['name']));
+            $month->setCode($value['code']);
 
             $allEntityMonths[] = $month;
 
@@ -105,7 +96,7 @@ class AppFixtures extends Fixture
         ];
         foreach ($dataUsers as $value) {
             $user = new User();
-            $user->setUsername($value['username']);
+            $user->setName($value['username']);
             $user->setEmail($value['mail']);
             $hashedPassword = $this->hasher->hashPassword(
                 $user,
@@ -118,7 +109,7 @@ class AppFixtures extends Fixture
             $manager->persist($user);
         }
 
-        
+
         /**
          *! Ajout des catégories
          */
@@ -190,7 +181,6 @@ class AppFixtures extends Fixture
 
             $manager->persist($transaction);
         }
-
         $manager->flush();
     }
 }

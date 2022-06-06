@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\TransactionRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=TransactionRepository::class)
@@ -22,18 +23,36 @@ class Transaction
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 250,
+     *      minMessage = "Le nom de la transaction doit être supérieur à {{ limit }}",
+     *      maxMessage = "Le nom de la transaction doit être inférieur à {{ limit }}",
+     * )
+     * @Assert\Type("string")
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=255)
      * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 250,
+     *      minMessage = "Le libellé de la transaction doit être supérieur à {{ limit }}",
+     *      maxMessage = "Le libellé de la transaction doit être inférieur à {{ limit }}",
+     * )
+     * @Assert\Type("string")
      */
     private $wording;
 
     /**
      * @ORM\Column(type="float")
      * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Assert\Type(
+     *      type="integer",
+     *      message="La valeur {{ value }} n'est pas un {{ type }} valide"
+     * )
      */
     private $balance;
 

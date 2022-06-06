@@ -159,3 +159,54 @@ $dataCategories = [
         'Virements internes',
     ]
 ];
+
+$months = [
+    [
+        'name' => 'Janvier',
+        'code' => 1
+    ],
+    [
+        'name' => 'Février',
+        'code' => 2
+    ],
+    [
+        'name' => 'Mars',
+        'code' => 3
+    ],
+    [
+        'name' => 'Avril',
+        'code' => 4
+    ],
+    [
+        'name' => 'Mai',
+        'code' => 5
+    ],
+    [
+        'name' => 'Juin',
+        'code' => 6
+    ],
+    [
+        'name' => 'Juillet',
+        'code' => 7
+    ],
+    [
+        'name' => 'Août',
+        'code' => 8
+    ],
+    [
+        'name' => 'Septembre',
+        'code' => 9
+    ],
+    [
+        'name' => 'Octobre',
+        'code' => 10
+    ],
+    [
+        'name' => 'Novembre',
+        'code' => 11
+    ],
+    [
+        'name' => 'Décembre',
+        'code' => 12
+    ],
+];

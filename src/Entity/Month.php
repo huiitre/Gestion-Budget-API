@@ -38,6 +38,11 @@ class Month
      */
     private $slug;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $code;
+
     public function __construct()
     {
         $this->transactions = new ArrayCollection();
@@ -98,6 +103,18 @@ class Month
     public function setSlug(string $slug): self
     {
         $this->slug = $slug;
+
+        return $this;
+    }
+
+    public function getCode(): ?int
+    {
+        return $this->code;
+    }
+
+    public function setCode(int $code): self
+    {
+        $this->code = $code;
 
         return $this;
     }

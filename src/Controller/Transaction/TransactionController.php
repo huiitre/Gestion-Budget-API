@@ -4,12 +4,23 @@ namespace App\Controller\Transaction;
 
 use App\Entity\Month;
 use App\Entity\Subcategory;
+use App\Entity\Transaction;
 use App\Entity\User;
+use App\Models\JsonError;
 use App\Repository\TransactionRepository;
+use App\Service\MySlugger;
+use DateTimeImmutable;
+use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 /**
  * @Route("/api/transaction", name="api_transaction_")
@@ -21,8 +32,12 @@ class TransactionController extends AbstractController
      */
     public function showTransactionsList(TransactionRepository $tr): Response
     {
+        $user = $this->getUser();
         return $this->json(
-            $tr->findAll(),
+            [
+                'balance' => 1000,
+                'data' => $tr->findBy(['user' => $user]),
+            ],
             200,
             [],
             [
@@ -34,24 +49,71 @@ class TransactionController extends AbstractController
     }
 
     /**
-     * @Route("/user/{id}/subcategory/{$id2}", name="user_id")
+     * @Route("/balance/{month?}", name="balance_by_month")
      *
-     * @param Request $request
+     * @param TransactionRepository $tr
      * @return Response
      */
-    public function showTransactionsBySubcategory(Request $request, TransactionRepository $tr, User $user, Subcategory $subcategory): Response
+    public function showBalance(TransactionRepository $tr, $month): Response
     {
-        $transactionsList = $tr->findBy(['subcategory' => $subcategory]);
-
+        $user = $this->getUser();
+        $data = $tr->balanceByMonth($user, $month);
         return $this->json(
-            $transactionsList,
+            $data,
             200,
             [],
-            [
-                'groups' => [
-                    'get_transactions'
-                ]
-            ]
+            ['groups' => 'get_transactions']
+        );
+    }
+
+    /**
+     * @Route("/create", name="create", methods={"POST"})
+     *
+     * @return Response
+     */
+    public function createTransaction(
+        Request $req,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator,
+        SluggerInterface $slugger,
+        EntityManagerInterface $em
+    ): Response
+    {
+        $data = $req->getContent();
+        $user = $this->getUser();
+
+        try {
+            $newTransaction = $serializer->deserialize($data, Transaction::class, 'json');
+        } catch (Exception $e) {
+            return new JsonResponse('JSON invalide', Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        $errors = $validator->validate($newTransaction);
+        // dd(count($errors));
+        if (count($errors) > 0) {
+            $myJsonError = new JsonError(Response::HTTP_UNPROCESSABLE_ENTITY, 'Des erreurs de validation ont été trouvées');
+            $myJsonError->setValidationErrors($errors);
+            // return new JsonResponse($myJsonError, Response::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->json($myJsonError, $myJsonError->getError());
+        }
+
+        $slug = $slugger->slug($newTransaction->getName());
+        $newTransaction->setSlug($slug);
+
+        $newTransaction->setDebitedAt(new DateTimeImmutable('now'));
+        $newTransaction->setCreatedAt(new DateTimeImmutable('now'));
+        $newTransaction->setUser($user);
+
+
+        $em->persist($newTransaction);
+
+        $em->flush();
+
+        return $this->json(
+            $newTransaction,
+            response::HTTP_CREATED,
+            [],
+            ['groups' => 'get_transactions']
         );
     }
 }

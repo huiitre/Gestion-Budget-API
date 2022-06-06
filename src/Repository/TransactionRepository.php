@@ -39,6 +39,26 @@ class TransactionRepository extends ServiceEntityRepository
         }
     }
 
+    public function balanceByMonth($user, $month)
+    {
+        $qb = $this->createQueryBuilder('t')
+                ->select('SUM(t.balance)')
+                ->where('t.is_active = true')
+                ->andWhere('t.is_seen = true')
+                ->andWhere("t.user = :user")
+                ->setParameter('user', $user);
+
+        if ($month === null) {
+            $qb->andWhere('t.month = MONTH(NOW())');
+        } else {
+            $qb->andWhere('t.month = :month')
+                ->setParameter('month', $month);
+        }
+
+        return $qb->getQuery()
+                ->getResult();
+    }
+
 //    /**
 //     * @return Transaction[] Returns an array of Transaction objects
 //     */
