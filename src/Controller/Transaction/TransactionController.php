@@ -49,20 +49,74 @@ class TransactionController extends AbstractController
     }
 
     /**
-     * @Route("/balance/{month?}", name="balance_by_month")
+     * @Route("/list/month/{month?}/{year?}", name="list_by_month")
+     *
+     * @param TransactionRepository $tr
+     * @param [type] $month
+     * @param [type] $year
+     * @return Response
+     */
+    public function showTransactionsByMonth(TransactionRepository $tr, $month, $year): Response
+    {
+        $user = $this->getUser();
+        $data = $tr->transactionsByMonth($user, $month, $year);
+        return $this->json(
+            $data,
+            200,
+            []
+        );
+    }
+
+    /**
+     * @Route("/balance/month/{month?}/{year?}", name="balance_by_month")
      *
      * @param TransactionRepository $tr
      * @return Response
      */
-    public function showBalance(TransactionRepository $tr, $month): Response
+    public function showBalanceByMonth(TransactionRepository $tr, $month, $year): Response
     {
         $user = $this->getUser();
-        $data = $tr->balanceByMonth($user, $month);
+        $data = $tr->balanceByMonth($user, $month, $year);
         return $this->json(
             $data,
             200,
-            [],
-            ['groups' => 'get_transactions']
+            []
+        );
+    }
+
+    /**
+     * @Route("/list/year/{year?}/{month?}", name="list_by_year")
+     *
+     * @param TransactionRepository $tr
+     * @param [type] $year
+     * @param [type] $month
+     * @return Response
+     */
+    public function showTransactionsByYear(TransactionRepository $tr, $year, $month):Response
+    {
+        $user = $this->getUser();
+        $data = $tr->transactionsByYear($user, $year, $month);
+        return $this->json(
+            $data,
+            200,
+            []
+        );
+    }
+
+    /**
+     * @Route("/balance/year/{year?}/{month?}", name="balance_by_year")
+     *
+     * @param TransactionRepository $tr
+     * @return Response
+     */
+    public function showBalanceByYear(TransactionRepository $tr, $year, $month): Response
+    {
+        $user = $this->getUser();
+        $data = $tr->balanceByYear($user, $year, $month);
+        return $this->json(
+            $data,
+            200,
+            []
         );
     }
 
@@ -96,6 +150,8 @@ class TransactionController extends AbstractController
             // return new JsonResponse($myJsonError, Response::HTTP_UNPROCESSABLE_ENTITY);
             return $this->json($myJsonError, $myJsonError->getError());
         }
+
+        dd($newTransaction);
 
         $slug = $slugger->slug($newTransaction->getName());
         $newTransaction->setSlug($slug);

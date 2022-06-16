@@ -28,7 +28,7 @@ class TransactionProvider
         'PHIE LA GARENNE69GREZIEU LA V - 210522 CB5256'
     ];
 
-    private $balance = [
+    /* private $balance = [
         -12.95,
         -5.94,
         -32.32,
@@ -38,79 +38,33 @@ class TransactionProvider
         -38.45,
         -31.30,
         -11.05,
+        44.54,
+        24.54,
+        245,
+
     ];
 
     private $isFixed = [
-        false,
-        false,
-        false,
         true,
-        false,
-        false,
-        true,
-        false,
+        false
     ];
 
     private $isSeen = [
         true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
+        false
     ];
 
     private $isActive = [
         true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-        true,
-    ];
-
-    /**
-     * Get the value of isActive
-     */ 
-    public function getIsActive()
-    {
-        return $this->isActive;
-    }
-
-    /**
-     * Get the value of isSeen
-     */ 
-    public function getIsSeen()
-    {
-        return $this->isSeen;
-    }
-
-    /**
-     * Get the value of isFixed
-     */ 
-    public function getIsFixed()
-    {
-        return $this->isFixed;
-    }
-
-    /**
-     * Get the value of balance
-     */ 
-    public function getBalance()
-    {
-        return $this->balance;
-    }
+        false
+    ]; */
 
     /**
      * Get the value of orderName
      */ 
     public function getWording()
     {
-        return $this->wording;
+        return $this->wording[array_rand($this->wording)];
     }
 
     /**
@@ -118,6 +72,6 @@ class TransactionProvider
      */ 
     public function getName()
     {
-        return $this->name;
+        return $this->name[array_rand($this->name)];
     }
 }

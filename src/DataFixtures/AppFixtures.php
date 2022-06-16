@@ -16,6 +16,7 @@ use Doctrine\Persistence\ObjectManager;
 use App\DataFixtures\Providers\TransactionProvider;
 use App\Entity\Month;
 use App\Entity\User;
+use DoctrineExtensions\Query\Mysql\Date;
 
 class AppFixtures extends Fixture
 {
@@ -140,44 +141,63 @@ class AppFixtures extends Fixture
         /**
          *! Ajout des transactions
          */
+        
+        $tp = new TransactionProvider();
+        
+        //* ajout du salaire par mois
+        for ($y = 2019; $y <= 2022; $y++) {
+            for ($m = 1; $m <= 12; $m++) {
+                $salaire = new Transaction();
+                $salaire->setName('Salaire Distrilog');
+                $salaire->setWording('DISTRILOG');
+                $salaire->setBalance(mt_rand(1800.45, 2145.85));
+                $randDate = new DateTimeImmutable($y . '-' . $m . '-' . mt_rand(1, 5));
+                //! déprécié
+                $salaire->setCreditedAt($randDate);
+                $salaire->setIsFixed(true);
+                $salaire->setIsSeen(true);
+                $salaire->setIsActive(true);
+                $salaire->setSlug($this->slugger->slugify('Salaire Distrilog'));
+                //? on va venir se fier à ça dorénavent
+                $salaire->setCreatedAt($randDate);
 
-        $transactionProvider = new TransactionProvider();
+                $salaire->setSubcategory($allEntitySubcategories[112]);
+                $salaire->setUser($allEntityUsers[0]);
+                //! déprécié
+                $salaire->setMonth($allEntityMonths[2]);
+                //? 1 étant un ajout au compte, 2 étant un retrait
+                $salaire->setStatus(1);
 
-        //* ajout du salaire à la mano
-        $salaire = new Transaction();
-        $salaire->setName('Salaire Distrilog');
-        $salaire->setWording('DISTRILOG');
-        $salaire->setBalance(975.45);
-        $salaire->setCreditedAt(DateTimeImmutable::createFromMutable($faker->dateTimeThisMonth()));
-        $salaire->setIsFixed(true);
-        $salaire->setIsSeen(true);
-        $salaire->setIsActive(true);
-        $salaire->setSlug($this->slugger->slugify('Salaire Distrilog'));
-        $salaire->setCreatedAt($now);
+                $manager->persist($salaire);
+            }
+        }
 
-        $salaire->setSubcategory($allEntitySubcategories[112]);
-        $salaire->setUser($allEntityUsers[0]);
-        $salaire->setMonth($allEntityMonths[2]);
 
-        $manager->persist($salaire);
-
-        for ($i = 0; $i < 8; $i++) {
+        //* ajout des dépenses
+        for ($i = 0; $i < 251; $i++) {
 
             $transaction = new Transaction();
 
-            $transaction->setName($transactionProvider->getName()[$i]);
-            $transaction->setWording($transactionProvider->getWording()[$i]);
-            $transaction->setBalance($transactionProvider->getBalance()[$i]);
-            $transaction->setDebitedAt(DateTimeImmutable::createFromMutable($faker->dateTimeThisMonth()));
-            $transaction->setIsFixed($transactionProvider->getIsFixed()[$i]);
-            $transaction->setIsSeen($transactionProvider->getIsSeen()[$i]);
-            $transaction->setIsActive($transactionProvider->getIsActive()[$i]);
-            $transaction->setSlug($this->slugger->slugify($transactionProvider->getName()[$i]));
-            $transaction->setCreatedAt($now);
+            $date = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2019-01-01'), 'now'));
+
+            $transaction->setName($tp->getName());
+            $transaction->setWording($tp->getWording());
+            $transaction->setBalance(mt_rand(-849 * 10, -5 * 10) / 10);
+            //! déprécié
+            $transaction->setDebitedAt($date);
+            $transaction->setIsFixed(rand(0, 1));
+            $transaction->setIsSeen(rand(0, 1));
+            $transaction->setIsActive(rand(0, 1));
+            $transaction->setSlug($this->slugger->slugify($transaction->getName()));
+            //? on va venir se fier à ça dorénavent
+            $transaction->setCreatedAt($date);
 
             $transaction->setSubcategory($allEntitySubcategories[mt_rand(0, 111)]);
-            $transaction->setUser($allEntityUsers[mt_rand(0, 2)]);
+            $transaction->setUser($allEntityUsers[0]);
+            //! déprécié
             $transaction->setMonth($allEntityMonths[2]);
+            //? 1 étant un ajout au compte, 2 étant un retrait
+            $transaction->setStatus(2);
 
             $manager->persist($transaction);
         }
