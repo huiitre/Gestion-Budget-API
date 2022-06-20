@@ -50,7 +50,7 @@ class Transaction
      * @ORM\Column(type="float")
      * @Groups({"get_categories", "get_transactions", "get_users"})
      * @Assert\Type(
-     *      type="integer",
+     *      type="float",
      *      message="La valeur {{ value }} n'est pas un {{ type }} valide"
      * )
      */
@@ -112,13 +112,6 @@ class Transaction
      * @Groups({"get_categories", "get_transactions", "get_users"})
      */
     private $updated_at;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=Month::class, inversedBy="transactions")
-     * @ORM\JoinColumn(nullable=false)
-     * @Groups({"get_users", "get_transactions", "get_categories"})
-     */
-    private $month;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -276,18 +269,6 @@ class Transaction
     public function setUpdatedAt(?\DateTimeImmutable $updated_at): self
     {
         $this->updated_at = $updated_at;
-
-        return $this;
-    }
-
-    public function getMonth(): ?Month
-    {
-        return $this->month;
-    }
-
-    public function setMonth(?Month $month): self
-    {
-        $this->month = $month;
 
         return $this;
     }

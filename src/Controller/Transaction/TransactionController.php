@@ -10,6 +10,7 @@ use App\Models\JsonError;
 use App\Repository\TransactionRepository;
 use App\Service\MySlugger;
 use DateTimeImmutable;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -139,7 +140,7 @@ class TransactionController extends AbstractController
         try {
             $newTransaction = $serializer->deserialize($data, Transaction::class, 'json');
         } catch (Exception $e) {
-            return new JsonResponse('JSON invalide', Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse('JSON invalide : ' . $e, Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $errors = $validator->validate($newTransaction);
@@ -151,19 +152,22 @@ class TransactionController extends AbstractController
             return $this->json($myJsonError, $myJsonError->getError());
         }
 
-        dd($newTransaction);
-
         $slug = $slugger->slug($newTransaction->getName());
         $newTransaction->setSlug($slug);
 
-        $newTransaction->setDebitedAt(new DateTimeImmutable('now'));
         $newTransaction->setCreatedAt(new DateTimeImmutable('now'));
         $newTransaction->setUser($user);
 
 
         $em->persist($newTransaction);
 
-        $em->flush();
+        try {
+            //? on va envoyer les informations en base de données.
+            $em->flush();
+        } 
+        catch (UniqueConstraintViolationException $e) {
+            return new JsonResponse("Erreur : $e", Response::HTTP_CONFLICT);
+        }
 
         return $this->json(
             $newTransaction,

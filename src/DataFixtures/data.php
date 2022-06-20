@@ -160,7 +160,7 @@ $dataCategories = [
     ]
 ];
 
-$months = [
+/* $months = [
     [
         'name' => 'Janvier',
         'code' => 1
@@ -209,4 +209,4 @@ $months = [
         'name' => 'Décembre',
         'code' => 12
     ],
-];
+]; */

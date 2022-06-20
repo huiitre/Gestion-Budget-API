@@ -49,26 +49,38 @@ class TransactionRepository extends ServiceEntityRepository
             $year = "and YEAR(created_at) = $year";
         }
 
-        $sql = "select *
+        $sql = "SELECT
+                    t.id as t_id, 
+                    t.name as t_name,
+                    t.wording as t_wording,
+                    t.balance as t_balance,
+                    t.created_at as t_created_at,
+                    t.slug as t_slug,
+                    t.status as t_status,
+                    s.id as s_id,
+                    s.name as s_name,
+                    c.id as c_id,
+                    c.name as c_name
                 from (
                     select *
-                    from `transaction` t 
-                    where month(created_at) = :month
-                    and is_active = true 
-                    and is_seen = true
-                    and user_id = :user
+                    from `transaction` t
+                    where user_id = :user
                     and status = 1
+                    and month(created_at) = :month
                     $year
                     union
                     select *
                     from `transaction` t
-                    where month(created_at) = :month
-                    and is_active = true 
-                    and is_seen = true
-                    and user_id = :user
+                    where user_id = :user
                     and status = 2
+                    and month(created_at) = :month
                     $year
-                ) t ORDER BY t.created_at
+                ) t
+                INNER JOIN `subcategory` s
+                ON t.subcategory_id = s.id
+                INNER JOIN `category` c
+                ON s.category_id = c.id
+                ORDER BY t.created_at
         ";
         $conn = $this->getEntityManager()->getConnection();
         $query = $conn->prepare($sql);
@@ -97,7 +109,7 @@ class TransactionRepository extends ServiceEntityRepository
             $year = "and YEAR(created_at) = $year";
         }
 
-        $sql = "select ROUND(SUM(t.balance), 2) as balance, count(t.id) as count
+        $sql = "SELECT ROUND(SUM(t.balance), 2) as balance, count(t.id) as count
                 from (
                     select *
                     from `transaction` t 
@@ -139,7 +151,7 @@ class TransactionRepository extends ServiceEntityRepository
         // if ($year == null) $year = '20' . date('y');
 
         if ($month !== null) {
-            $month = "and MONTH(created_at) = $month";
+            $month = "and MONTH(t.created_at) = $month";
         }
 
         $sql = "SELECT
@@ -147,41 +159,65 @@ class TransactionRepository extends ServiceEntityRepository
                 FROM
                     (
                         SELECT
-                            *
+                            t.id as t_id, 
+                            t.name as t_name,
+                            t.wording as t_wording,
+                            t.balance as t_balance,
+                            t.created_at as t_created_at,
+                            t.slug as t_slug,
+                            t.status as t_status,
+                            s.id as s_id,
+                            s.name as s_name,
+                            c.id as c_id,
+                            c.name as c_name
                         FROM
                             `transaction` t
+                        INNER JOIN `subcategory` s
+                        ON t.subcategory_id = s.id
+                        INNER JOIN `category` c
+                        ON s.category_id = c.id
                         WHERE
-                            is_active = true
-                            AND is_seen = true
-                            AND user_id = 1
-                            AND status = 1
+                            t.user_id = :user
+                            AND t.status = 1
                             AND 
                             CASE
                                 WHEN :year is null
-                                THEN year(created_at) = year(CURRENT_TIMESTAMP)
-                                ELSE YEAR(created_at) = :year
+                                THEN year(t.created_at) = year(CURRENT_TIMESTAMP)
+                                ELSE YEAR(t.created_at) = :year
                             END
                             $month
                         UNION
                         SELECT
-                            *
+                            t.id as t_id, 
+                            t.name as t_name,
+                            t.wording as t_wording,
+                            t.balance as t_balance,
+                            t.created_at as t_created_at,
+                            t.slug as t_slug,
+                            t.status as t_status,
+                            s.id as s_id,
+                            s.name as s_name,
+                            c.id as c_id,
+                            c.name as c_name
                         FROM
                             `transaction` t
+                        INNER JOIN `subcategory` s
+                        ON t.subcategory_id = s.id
+                        INNER JOIN `category` c
+                        ON s.category_id = c.id
                         WHERE
-                            is_active = true
-                            AND is_seen = true
-                            AND user_id = 1
-                            AND status = 2
+                            t.user_id = :user
+                            AND t.status = 2
                             AND 
                             CASE
                                 WHEN :year is null
-                                THEN year(created_at) = year(CURRENT_TIMESTAMP)
-                                ELSE YEAR(created_at) = :year
+                                THEN year(t.created_at) = year(CURRENT_TIMESTAMP)
+                                ELSE YEAR(t.created_at) = :year
                             END
                             $month
                     ) t
                 ORDER BY
-                    t.created_at desc;
+                    t.t_created_at
         ";
         $conn = $this->getEntityManager()->getConnection();
         $query = $conn->prepare($sql);
@@ -203,32 +239,52 @@ class TransactionRepository extends ServiceEntityRepository
      */
     public function balanceByYear($user, $year = null, $month = null)
     {
-        if ($year == null) $year = '20' . date('y');
+        // if ($year == null) $year = '20' . date('y');
 
         if ($month !== null) {
             $month = "and MONTH(created_at) = $month";
         }
 
-        $sql = "select ROUND(SUM(t.balance), 2) as balance, count(t.id) as count
-                from (
-                    select *
-                    from `transaction` t 
-                    where year(created_at) = :year
-                    and is_active = true 
-                    and is_seen = true
-                    and user_id = :user
-                    and status = 1
-                    $month
-                    union
-                    select *
-                    from `transaction` t
-                    where year(created_at) = :year
-                    and is_active = true 
-                    and is_seen = true
-                    and user_id = :user
-                    and status = 2
-                    $month
-                ) t
+        $sql = "SELECT
+                    ROUND(SUM(t.balance), 2) as balance, count(t.id) as count
+                FROM
+                    (
+                        SELECT
+                            *
+                        FROM
+                            `transaction` t
+                        WHERE
+                            is_active = true
+                            AND is_seen = true
+                            AND user_id = :user
+                            AND status = 1
+                            AND 
+                            CASE
+                                WHEN :year is null
+                                THEN year(created_at) = year(CURRENT_TIMESTAMP)
+                                ELSE YEAR(created_at) = :year
+                            END
+                            $month
+                        UNION
+                        SELECT
+                            *
+                        FROM
+                            `transaction` t
+                        WHERE
+                            is_active = true
+                            AND is_seen = true
+                            AND user_id = :user
+                            AND status = 2
+                            AND 
+                            CASE
+                                WHEN :year is null
+                                THEN year(created_at) = year(CURRENT_TIMESTAMP)
+                                ELSE YEAR(created_at) = :year
+                            END
+                            $month
+                    ) t
+                ORDER BY
+                    t.created_at desc;
         ";
         $conn = $this->getEntityManager()->getConnection();
         $query = $conn->prepare($sql);

@@ -14,9 +14,7 @@ use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ObjectManager;
 use App\DataFixtures\Providers\TransactionProvider;
-use App\Entity\Month;
 use App\Entity\User;
-use DoctrineExtensions\Query\Mysql\Date;
 
 class AppFixtures extends Fixture
 {
@@ -41,7 +39,6 @@ class AppFixtures extends Fixture
         $this->connexion->executeQuery('TRUNCATE TABLE subcategory');
         $this->connexion->executeQuery('TRUNCATE TABLE transaction');
         $this->connexion->executeQuery('TRUNCATE TABLE user');
-        $this->connexion->executeQuery('TRUNCATE TABLE month');
     }
 
     public function load(ObjectManager $manager)
@@ -58,7 +55,7 @@ class AppFixtures extends Fixture
         /**
          * ! Ajout des mois
          */
-        $allEntityMonths = [];
+        /* $allEntityMonths = [];
 
         foreach ($months as $value) {
             $month = new Month();
@@ -71,7 +68,7 @@ class AppFixtures extends Fixture
             $allEntityMonths[] = $month;
 
             $manager->persist($month);
-        }
+        } */
 
 
         /**
@@ -153,7 +150,7 @@ class AppFixtures extends Fixture
                 $salaire->setBalance(mt_rand(1800.45, 2145.85));
                 $randDate = new DateTimeImmutable($y . '-' . $m . '-' . mt_rand(1, 5));
                 //! déprécié
-                $salaire->setCreditedAt($randDate);
+                // $salaire->setCreditedAt($randDate);
                 $salaire->setIsFixed(true);
                 $salaire->setIsSeen(true);
                 $salaire->setIsActive(true);
@@ -164,7 +161,7 @@ class AppFixtures extends Fixture
                 $salaire->setSubcategory($allEntitySubcategories[112]);
                 $salaire->setUser($allEntityUsers[0]);
                 //! déprécié
-                $salaire->setMonth($allEntityMonths[2]);
+                // $salaire->setMonth($allEntityMonths[2]);
                 //? 1 étant un ajout au compte, 2 étant un retrait
                 $salaire->setStatus(1);
 
@@ -184,10 +181,12 @@ class AppFixtures extends Fixture
             $transaction->setWording($tp->getWording());
             $transaction->setBalance(mt_rand(-849 * 10, -5 * 10) / 10);
             //! déprécié
-            $transaction->setDebitedAt($date);
-            $transaction->setIsFixed(rand(0, 1));
-            $transaction->setIsSeen(rand(0, 1));
-            $transaction->setIsActive(rand(0, 1));
+            // $transaction->setDebitedAt($date);
+            //! dépréciés
+            $transaction->setIsFixed(true);
+            $transaction->setIsSeen(true);
+            $transaction->setIsActive(true);
+            //! --------------------
             $transaction->setSlug($this->slugger->slugify($transaction->getName()));
             //? on va venir se fier à ça dorénavent
             $transaction->setCreatedAt($date);
@@ -195,7 +194,7 @@ class AppFixtures extends Fixture
             $transaction->setSubcategory($allEntitySubcategories[mt_rand(0, 111)]);
             $transaction->setUser($allEntityUsers[0]);
             //! déprécié
-            $transaction->setMonth($allEntityMonths[2]);
+            // $transaction->setMonth($allEntityMonths[2]);
             //? 1 étant un ajout au compte, 2 étant un retrait
             $transaction->setStatus(2);
 
