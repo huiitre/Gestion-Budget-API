@@ -171,7 +171,7 @@ class AppFixtures extends Fixture
 
 
         //* ajout des dépenses
-        for ($i = 0; $i < 251; $i++) {
+        for ($i = 0; $i < 500; $i++) {
 
             $transaction = new Transaction();
 

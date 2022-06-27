@@ -22,7 +22,8 @@ class JsonError
         foreach ($errors as $error) {
             //dd($error);
             
-            $this->message[] = "La valeur '" .$error->getInvalidValue(). "' ne respecte pas les règles de validation de la propriété '". $error->getPropertyPath() . "'";
+            $this->message[] = " La valeur '" .$error->getInvalidValue(). "' ne respecte pas les règles de validation de la propriété '". $error->getPropertyPath() . "'.";
+            $this->message[] .= ' ' . $error->getMessage() . '.';
         }
         // dd($this);
     }

@@ -12,17 +12,22 @@ use Symfony\Component\Validator\Constraints as Assert;
  */
 class Transaction
 {
+    /*
+     * NOTE
+     * Suppression du group "get_categories" car on a pas besoin des transactions pour la liste des catégories
+     */
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      * @Assert\Length(
      *      min = 3,
      *      max = 250,
@@ -35,7 +40,7 @@ class Transaction
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      * @Assert\Length(
      *      min = 3,
      *      max = 250,
@@ -48,7 +53,7 @@ class Transaction
 
     /**
      * @ORM\Column(type="float")
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      * @Assert\Type(
      *      type="float",
      *      message="La valeur {{ value }} n'est pas un {{ type }} valide"
@@ -58,31 +63,31 @@ class Transaction
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $credited_at;
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $debited_at;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $is_fixed;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $is_seen;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $is_active;
 
@@ -92,6 +97,9 @@ class Transaction
      * @ORM\ManyToOne(targetEntity=Subcategory::class, inversedBy="transactions")
      * @ORM\JoinColumn(nullable=false)
      * @Groups({"get_transactions", "get_users"})
+     * @Assert\NotBlank(
+     *      message="Veuillez renseigner une sous catégorie"
+     * )
      */
     private $subcategory;
 
@@ -103,24 +111,25 @@ class Transaction
 
     /**
      * @ORM\Column(type="datetime_immutable")
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $created_at;
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $updated_at;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get_categories", "get_transactions", "get_users"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $slug;
 
     /**
      * @ORM\Column(type="integer")
+     * @Groups({"get_transactions", "get_users"})
      */
     private $status;
 

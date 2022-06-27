@@ -40,20 +40,28 @@ class TransactionRepository extends ServiceEntityRepository
         }
     }
 
-    public function transactionsByMonth($user,  $month = null, $year = null)
+    public function transactionsByMonth($user,  $month = null, $year = null, $limit, $offset, $object)
     {
+        if ($object !== null) {
+            $orderByStr = "ORDER BY $object->orderBy $object->order";
+        } else {
+            $orderByStr = "ORDER BY t.created_at desc";
+        }
+        
+
         if ($month == null) $month = date('m');
         if ($year == null) $year = '20' . date('y');
 
         if ($year !== null && $month !== null) {
             $year = "and YEAR(created_at) = $year";
         }
+        $limitSQL = $limit != null ? 'LIMIT ' . intval($limit) . ' OFFSET ' . $offset : '';
 
         $sql = "SELECT
-                    t.id as t_id, 
+                    t.id as t_id,
                     t.name as t_name,
                     t.wording as t_wording,
-                    t.balance as t_balance,
+                    ROUND(t.balance, 2) as t_balance,
                     t.created_at as t_created_at,
                     t.slug as t_slug,
                     t.status as t_status,
@@ -80,13 +88,15 @@ class TransactionRepository extends ServiceEntityRepository
                 ON t.subcategory_id = s.id
                 INNER JOIN `category` c
                 ON s.category_id = c.id
-                ORDER BY t.created_at
+                $orderByStr
+                $limitSQL
         ";
         $conn = $this->getEntityManager()->getConnection();
         $query = $conn->prepare($sql);
         $query->bindValue('month', $month);
         $query->bindValue('user', $user->getId());
 
+        // dd(count($query->execute()->fetchAllAssociative())); -- 12
         return $query->execute()->fetchAllAssociative();
     }
 
@@ -109,7 +119,7 @@ class TransactionRepository extends ServiceEntityRepository
             $year = "and YEAR(created_at) = $year";
         }
 
-        $sql = "SELECT ROUND(SUM(t.balance), 2) as balance, count(t.id) as count
+        $sql = "SELECT ROUND(SUM(t.balance), 2) as total_balance, count(t.id) as total_count
                 from (
                     select *
                     from `transaction` t 
@@ -292,6 +302,22 @@ class TransactionRepository extends ServiceEntityRepository
         $query->bindValue('user', $user->getId());
 
         return $query->execute()->fetchAllAssociative();
+    }
+
+    public function deleteTransaction($user, $array)
+    {
+        $ids = $array;
+
+        $qb = $this->getEntityManager()->createQueryBuilder()
+            ->delete('App\Entity\Transaction', 't')
+            ->where('t.id IN (:ids)')
+            ->andWhere('t.user = :user')
+            ->setparameter('ids', $ids)
+            ->setParameter('user', $user->getId());
+        
+        $result = $qb->getQuery()->getSingleScalarResult();
+
+        return $result;
     }
 
 

@@ -13,6 +13,7 @@ use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,6 +29,11 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
  */
 class TransactionController extends AbstractController
 {
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
+
     /**
      * @Route("/list", name="list")
      */
@@ -36,7 +42,7 @@ class TransactionController extends AbstractController
         $user = $this->getUser();
         return $this->json(
             [
-                'balance' => 1000,
+                'count' => 1000,
                 'data' => $tr->findBy(['user' => $user]),
             ],
             200,
@@ -57,12 +63,55 @@ class TransactionController extends AbstractController
      * @param [type] $year
      * @return Response
      */
-    public function showTransactionsByMonth(TransactionRepository $tr, $month, $year): Response
+    public function showTransactionsByMonth(TransactionRepository $tr, Request $req, $month, $year): Response
     {
+        $body = $req->getContent();
+
+        if ($body !== "") {
+            $object = json_decode($body);
+        } else {
+            $object = null;
+        }
+
+        $limit = $req->query->get('limit');
+        $offset = $req->query->get('offset');
+
         $user = $this->getUser();
-        $data = $tr->transactionsByMonth($user, $month, $year);
+
+        $data = $tr->transactionsByMonth(
+            $user,
+            $month,
+            $year,
+            $limit,
+            $offset,
+            $object
+        );
+
+        $count = $tr->balanceByMonth($user, $month, $year);
+
+        if ($limit !== null && $offset !== null) {
+            $reqUri = 'http://localhost:8080';
+            $path = $req->getPathInfo();
+            $previousOffset = ($offset - $limit) < 0 ? null : $reqUri . $path . '?limit='.$limit.'&offset=' . ($offset - $limit);
+
+            $nextOffset = $offset > count($data) ? null : $reqUri . $path . '?limit='.$limit.'&offset=' . ($offset + $limit);
+
+            $return = [
+                'total' => $count[0],
+                'next' => $nextOffset,
+                'previous' => $previousOffset,
+                'data' => $data,
+            ];
+        } else {
+            $return = [
+                'total' => $count[0],
+                'data' => $data,
+            ];
+        }
+
+        
         return $this->json(
-            $data,
+            $return,
             200,
             []
         );
@@ -74,7 +123,7 @@ class TransactionController extends AbstractController
      * @param TransactionRepository $tr
      * @return Response
      */
-    public function showBalanceByMonth(TransactionRepository $tr, $month, $year): Response
+    /* public function showBalanceByMonth(TransactionRepository $tr, $month, $year): Response
     {
         $user = $this->getUser();
         $data = $tr->balanceByMonth($user, $month, $year);
@@ -83,7 +132,7 @@ class TransactionController extends AbstractController
             200,
             []
         );
-    }
+    } */
 
     /**
      * @Route("/list/year/{year?}/{month?}", name="list_by_year")
@@ -93,7 +142,7 @@ class TransactionController extends AbstractController
      * @param [type] $month
      * @return Response
      */
-    public function showTransactionsByYear(TransactionRepository $tr, $year, $month):Response
+    public function showTransactionsByYear(TransactionRepository $tr, $year, $month): Response
     {
         $user = $this->getUser();
         $data = $tr->transactionsByYear($user, $year, $month);
@@ -110,7 +159,7 @@ class TransactionController extends AbstractController
      * @param TransactionRepository $tr
      * @return Response
      */
-    public function showBalanceByYear(TransactionRepository $tr, $year, $month): Response
+    /* public function showBalanceByYear(TransactionRepository $tr, $year, $month): Response
     {
         $user = $this->getUser();
         $data = $tr->balanceByYear($user, $year, $month);
@@ -119,7 +168,7 @@ class TransactionController extends AbstractController
             200,
             []
         );
-    }
+    } */
 
     /**
      * @Route("/create", name="create", methods={"POST"})
@@ -132,10 +181,10 @@ class TransactionController extends AbstractController
         ValidatorInterface $validator,
         SluggerInterface $slugger,
         EntityManagerInterface $em
-    ): Response
-    {
+    ): Response {
         $data = $req->getContent();
         $user = $this->getUser();
+
 
         try {
             $newTransaction = $serializer->deserialize($data, Transaction::class, 'json');
@@ -146,8 +195,9 @@ class TransactionController extends AbstractController
         $errors = $validator->validate($newTransaction);
         // dd(count($errors));
         if (count($errors) > 0) {
-            $myJsonError = new JsonError(Response::HTTP_UNPROCESSABLE_ENTITY, 'Des erreurs de validation ont été trouvées');
+            $myJsonError = new JsonError(Response::HTTP_UNPROCESSABLE_ENTITY, 'Des erreurs de validation ont été trouvées.');
             $myJsonError->setValidationErrors($errors);
+            // dd($errors[0]);
             // return new JsonResponse($myJsonError, Response::HTTP_UNPROCESSABLE_ENTITY);
             return $this->json($myJsonError, $myJsonError->getError());
         }
@@ -158,15 +208,20 @@ class TransactionController extends AbstractController
         $newTransaction->setCreatedAt(new DateTimeImmutable('now'));
         $newTransaction->setUser($user);
 
+        if ($newTransaction->getBalance() > 0) {
+            $newTransaction->setStatus(1);
+        } else {
+            $newTransaction->setStatus(2);
+        }
 
+        // dd($newTransaction);
         $em->persist($newTransaction);
 
         try {
             //? on va envoyer les informations en base de données.
             $em->flush();
-        } 
-        catch (UniqueConstraintViolationException $e) {
-            return new JsonResponse("Erreur : $e", Response::HTTP_CONFLICT);
+        } catch (UniqueConstraintViolationException $e) {
+            return new JsonResponse("Erreur", Response::HTTP_CONFLICT);
         }
 
         return $this->json(
@@ -175,5 +230,42 @@ class TransactionController extends AbstractController
             [],
             ['groups' => 'get_transactions']
         );
+    }
+
+    /**
+     * @Route("/delete", name="delete", methods={"DELETE"})
+     *
+     * @param TransactionRepository $tr
+     * @param EntityManagerInterface $em
+     * @param Request $req
+     * @return void
+     */
+    public function deleteTransaction(TransactionRepository $tr, EntityManagerInterface $em, Request $req,SerializerInterface $serializer)
+    {
+        $user = $this->getUser();
+        $data = $req->get('id');
+        $array = json_decode($data);
+
+        $result = $tr->deleteTransaction($user, $array);
+        if ($result > 0) {
+            return $this->json(
+                [
+                    'status_code' => 1,
+                    'message' => 'La suppression a bien été effectué',
+                ],
+                Response::HTTP_OK,
+                [],
+            );
+        } else {
+            return $this->json(
+                [
+                    'status_code' => 2,
+                    'message' => 'Veuillez sélectionner une transaction à supprimer',
+                ],
+                Response::HTTP_OK,
+                [],
+            );
+        }
+
     }
 }
