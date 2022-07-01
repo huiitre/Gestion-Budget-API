@@ -175,7 +175,7 @@ class AppFixtures extends Fixture
 
             $transaction = new Transaction();
 
-            $date = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2019-01-01'), 'now'));
+            $date = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2019-01-01'), date('2022-12-31')));
 
             $transaction->setName($tp->getName());
             $transaction->setWording($tp->getWording());
