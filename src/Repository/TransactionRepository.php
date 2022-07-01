@@ -40,22 +40,34 @@ class TransactionRepository extends ServiceEntityRepository
         }
     }
 
-    public function transactionsByMonth($user,  $month = null, $year = null, $limit, $offset, $object)
+    public function transactionsByMonth($user, $obj)
     {
-        if ($object !== null) {
-            $orderByStr = "ORDER BY $object->orderBy $object->order";
+        $month = date('m');
+        $year = '20' . date('y');
+
+        //* gestion des mois
+        if (!empty($obj->month)) {
+            $month = intval($obj->month);
+        }
+
+        //* gestion des années
+        if (!empty($obj->year)) {
+            $year = intval($obj->year);
+        }
+
+        //* gestion du tri par colonne
+        if (!empty($obj->orderBy) && !empty($obj->order)) {
+            $orderBy = "ORDER BY $obj->orderBy $obj->order";
         } else {
-            $orderByStr = "ORDER BY t.created_at desc";
+            $orderBy = "ORDER BY t.created_at desc";
         }
-        
 
-        if ($month == null) $month = date('m');
-        if ($year == null) $year = '20' . date('y');
-
-        if ($year !== null && $month !== null) {
-            $year = "and YEAR(created_at) = $year";
+        //* gestion du limit/offset
+        if (!empty($obj->limit) && isset($obj->offset)) {
+            $limit = 'LIMIT ' . intval($obj->limit) . ' OFFSET ' . intval($obj->offset);
+        } else {
+            $limit = '';
         }
-        $limitSQL = $limit != null ? 'LIMIT ' . intval($limit) . ' OFFSET ' . $offset : '';
 
         $sql = "SELECT
                     t.id as t_id,
@@ -75,28 +87,28 @@ class TransactionRepository extends ServiceEntityRepository
                     where user_id = :user
                     and status = 1
                     and month(created_at) = :month
-                    $year
+                    and year(created_at) = :year
                     union
                     select *
                     from `transaction` t
                     where user_id = :user
                     and status = 2
                     and month(created_at) = :month
-                    $year
+                    and year(created_at) = :year
                 ) t
                 INNER JOIN `subcategory` s
                 ON t.subcategory_id = s.id
                 INNER JOIN `category` c
                 ON s.category_id = c.id
-                $orderByStr
-                $limitSQL
+                $orderBy
+                $limit
         ";
         $conn = $this->getEntityManager()->getConnection();
         $query = $conn->prepare($sql);
         $query->bindValue('month', $month);
+        $query->bindValue('year', $year);
         $query->bindValue('user', $user->getId());
-
-        // dd(count($query->execute()->fetchAllAssociative())); -- 12
+        
         return $query->execute()->fetchAllAssociative();
     }
 
@@ -314,7 +326,7 @@ class TransactionRepository extends ServiceEntityRepository
             ->andWhere('t.user = :user')
             ->setparameter('ids', $ids)
             ->setParameter('user', $user->getId());
-        
+
         $result = $qb->getQuery()->getSingleScalarResult();
 
         return $result;

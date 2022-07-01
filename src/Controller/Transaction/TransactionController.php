@@ -56,45 +56,47 @@ class TransactionController extends AbstractController
     }
 
     /**
-     * @Route("/list/month/{month?}/{year?}", name="list_by_month")
-     *
+     * @Route("/list/month", name="list_by_month")
+     * 
+     *  {
+     *      "orderBy": "t_name",
+     *      "order": "asc",
+     *      "limit": 5,
+     *      "offset": 5,
+     *      "month": 4,
+     *      "year": 2022
+     *  }
+     * 
      * @param TransactionRepository $tr
-     * @param [type] $month
-     * @param [type] $year
      * @return Response
      */
-    public function showTransactionsByMonth(TransactionRepository $tr, Request $req, $month, $year): Response
+    public function showTransactionsByMonth(TransactionRepository $tr, Request $req): Response
     {
         $body = $req->getContent();
-
         if ($body !== "") {
-            $object = json_decode($body);
+            $obj = json_decode($body);
         } else {
-            $object = null;
+            $obj = null;
         }
-
-        $limit = $req->query->get('limit');
-        $offset = $req->query->get('offset');
 
         $user = $this->getUser();
 
         $data = $tr->transactionsByMonth(
             $user,
-            $month,
-            $year,
-            $limit,
-            $offset,
-            $object
+            $obj
         );
 
+        $month = !empty($obj->month) ? $obj->month : date('m');
+        $year = !empty($obj->year) ? $obj->year : '20' . date('y');
         $count = $tr->balanceByMonth($user, $month, $year);
 
-        if ($limit !== null && $offset !== null) {
+        //? créer un service (fonction) qui va gérer le next et previous url plus tard
+        if (!empty($obj->limit) && isset($obj->offset)) {
             $reqUri = 'http://localhost:8080';
             $path = $req->getPathInfo();
-            $previousOffset = ($offset - $limit) < 0 ? null : $reqUri . $path . '?limit='.$limit.'&offset=' . ($offset - $limit);
+            $previousOffset = ($obj->offset - $obj->limit) < 0 ? null : $reqUri . $path . '?limit='.$obj->limit.'&offset=' . ($obj->offset - $obj->limit);
 
-            $nextOffset = $offset > count($data) ? null : $reqUri . $path . '?limit='.$limit.'&offset=' . ($offset + $limit);
+            $nextOffset = $obj->offset > count($data) ? null : $reqUri . $path . '?limit='.$obj->limit.'&offset=' . ($obj->offset + $obj->limit);
 
             $return = [
                 'total' => $count[0],
