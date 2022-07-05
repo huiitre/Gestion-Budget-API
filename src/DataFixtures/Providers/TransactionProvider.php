@@ -28,6 +28,25 @@ class TransactionProvider
         'PHIE LA GARENNE69GREZIEU LA V - 210522 CB5256'
     ];
 
+    
+    private $dataUsers = [
+        [
+            'username' => 'Yanis',
+            'mail' => 'a@a.fr',
+            'password' => '123456',
+        ],
+        [
+            'username' => 'Audrey',
+            'mail' => 'b@b.fr',
+            'password' => '123456',
+        ],
+        [
+            'username' => 'huiitre',
+            'mail' => 'c@c.fr',
+            'password' => '123456',
+        ],
+    ];
+
     /* private $balance = [
         -12.95,
         -5.94,
@@ -73,5 +92,25 @@ class TransactionProvider
     public function getName()
     {
         return $this->name[array_rand($this->name)];
+    }
+
+    /**
+     * Get the value of dataUsers
+     */ 
+    public function getDataUsers()
+    {
+        return $this->dataUsers;
+    }
+
+    /**
+     * Set the value of dataUsers
+     *
+     * @return  self
+     */ 
+    public function setDataUsers($dataUsers)
+    {
+        $this->dataUsers = $dataUsers;
+
+        return $this;
     }
 }

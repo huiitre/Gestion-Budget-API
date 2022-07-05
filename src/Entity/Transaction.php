@@ -133,6 +133,11 @@ class Transaction
      */
     private $status;
 
+    /**
+     * @ORM\OneToOne(targetEntity=TEssence::class, cascade={"persist", "remove"})
+     */
+    private $t_essence;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -302,6 +307,18 @@ class Transaction
     public function setStatus(int $status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    public function getTEssence(): ?TEssence
+    {
+        return $this->t_essence;
+    }
+
+    public function setTEssence(?TEssence $t_essence): self
+    {
+        $this->t_essence = $t_essence;
 
         return $this;
     }

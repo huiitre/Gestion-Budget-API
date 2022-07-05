@@ -2,6 +2,8 @@
 
 namespace App\DataFixtures;
 
+use App\DataFixtures\Providers\CategoryProvider;
+use App\DataFixtures\Providers\EssenceProvider;
 use App\Entity\Category;
 use App\Entity\Subcategory;
 use App\Entity\Transaction;
@@ -14,7 +16,10 @@ use DateTimeImmutable;
 use Doctrine\DBAL\Connection;
 use Doctrine\Persistence\ObjectManager;
 use App\DataFixtures\Providers\TransactionProvider;
+use App\Entity\Fuel;
+use App\Entity\TEssence;
 use App\Entity\User;
+use App\Entity\Vehicle;
 
 class AppFixtures extends Fixture
 {
@@ -35,21 +40,26 @@ class AppFixtures extends Fixture
     {
         $this->connexion->executeQuery('SET foreign_key_checks = 0');
 
+        $this->connexion->executeQuery('TRUNCATE TABLE fuel');
+        $this->connexion->executeQuery('TRUNCATE TABLE vehicle');
         $this->connexion->executeQuery('TRUNCATE TABLE category');
         $this->connexion->executeQuery('TRUNCATE TABLE subcategory');
         $this->connexion->executeQuery('TRUNCATE TABLE transaction');
+        $this->connexion->executeQuery('TRUNCATE TABLE tessence');
         $this->connexion->executeQuery('TRUNCATE TABLE user');
     }
-
+    
     public function load(ObjectManager $manager)
     {
-        include('data.php');
-
         $this->truncate();
 
         $faker = Faker::create('fr_FR');
 
         $now = new DateTimeImmutable('now');
+
+        $tp = new TransactionProvider();
+        $ep = new EssenceProvider();
+        $cp = new CategoryProvider();
 
 
         /**
@@ -72,27 +82,34 @@ class AppFixtures extends Fixture
 
 
         /**
+         *! Ajout des véhicules
+         */
+        $allEntityVehicles = [];
+        foreach ($ep->getDataVehicles() as $value) {
+            $vehicle = new Vehicle();
+            $vehicle->setName($value);
+            $allEntityVehicles[] = $vehicle;
+            $manager->persist($vehicle);
+        }
+
+
+        /**
+         *! Ajout des carburants
+         */
+        $allEntityFuels = [];
+        foreach ($ep->getDataFuels() as $value) {
+            $fuel = new Fuel();
+            $fuel->setName($value);
+            $allEntityFuels[] = $fuel;
+            $manager->persist($fuel);
+        }
+
+
+        /**
          *! Ajout des utilisateurs
          */
         $allEntityUsers = [];
-        $dataUsers = [
-            [
-                'username' => 'Yanis',
-                'mail' => 'a@a.fr',
-                'password' => '123456',
-            ],
-            [
-                'username' => 'Audrey',
-                'mail' => 'b@b.fr',
-                'password' => '123456',
-            ],
-            [
-                'username' => 'huiitre',
-                'mail' => 'c@c.fr',
-                'password' => '123456',
-            ],
-        ];
-        foreach ($dataUsers as $value) {
+        foreach ($tp->getDataUsers() as $value) {
             $user = new User();
             $user->setName($value['username']);
             $user->setEmail($value['mail']);
@@ -111,8 +128,9 @@ class AppFixtures extends Fixture
         /**
          *! Ajout des catégories
          */
+        // $cat = new CategoryProvider();
         $allEntitySubcategories = [];
-        foreach ($dataCategories as $key => $value) {
+        foreach ($cp->getDataCategories() as $key => $value) {
 
             $category = new Category();
             $category->setName($key);
@@ -138,9 +156,6 @@ class AppFixtures extends Fixture
         /**
          *! Ajout des transactions
          */
-        
-        $tp = new TransactionProvider();
-        
         //* ajout du salaire par mois
         for ($y = 2019; $y <= 2022; $y++) {
             for ($m = 1; $m <= 12; $m++) {
@@ -197,6 +212,18 @@ class AppFixtures extends Fixture
             // $transaction->setMonth($allEntityMonths[2]);
             //? 1 étant un ajout au compte, 2 étant un retrait
             $transaction->setStatus(2);
+
+            if ($transaction->getSubcategory()->getName() === 'Carburant') {
+                $essence = new TEssence();
+                $essence->setKmTravelled(mt_rand(400, 600));
+                $essence->setPriceLiter(mt_rand(1 * 10, 2 * 10) / 10);
+                $essence->setTank(45);
+                $essence->setVehicle($allEntityVehicles[0]);
+                $essence->setFuel($allEntityFuels[2]);
+                
+                $transaction->setTEssence($essence);
+                $manager->persist($essence);
+            }
 
             $manager->persist($transaction);
         }

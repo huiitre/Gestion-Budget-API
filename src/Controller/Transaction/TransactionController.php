@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Models\JsonError;
 use App\Repository\TransactionRepository;
 use App\Service\MySlugger;
+use ContainerCHiAHmo\getSubcategoryControllerService;
 use DateTimeImmutable;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
@@ -36,27 +37,6 @@ class TransactionController extends AbstractController
 
     /**
      * @Route("/list", name="list")
-     */
-    public function showTransactionsList(TransactionRepository $tr): Response
-    {
-        $user = $this->getUser();
-        return $this->json(
-            [
-                'count' => 1000,
-                'data' => $tr->findBy(['user' => $user]),
-            ],
-            200,
-            [],
-            [
-                'groups' => [
-                    'get_transactions'
-                ]
-            ]
-        );
-    }
-
-    /**
-     * @Route("/list/month", name="list_by_month")
      * 
      *  {
      *      "orderBy": "t_name",
@@ -70,7 +50,7 @@ class TransactionController extends AbstractController
      * @param TransactionRepository $tr
      * @return Response
      */
-    public function showTransactionsByMonth(TransactionRepository $tr, Request $req): Response
+    public function showTransactionsList(TransactionRepository $tr, Request $req): Response
     {
         $body = $req->getContent();
         if ($body !== "") {
@@ -81,14 +61,14 @@ class TransactionController extends AbstractController
 
         $user = $this->getUser();
 
-        $data = $tr->transactionsByMonth(
+        $data = $tr->transactionsList(
             $user,
             $obj
         );
 
         $month = !empty($obj->month) ? $obj->month : date('m');
         $year = !empty($obj->year) ? $obj->year : '20' . date('y');
-        $count = $tr->balanceByMonth($user, $month, $year);
+        $count = $tr->balance($user, $month, $year);
 
         //? créer un service (fonction) qui va gérer le next et previous url plus tard
         if (!empty($obj->limit) && isset($obj->offset)) {
@@ -216,7 +196,13 @@ class TransactionController extends AbstractController
             $newTransaction->setStatus(2);
         }
 
-        // dd($newTransaction);
+        /* if ($newTransaction->getSubcategory()->getId() === 40) {
+            dd($newTransaction);
+        }
+
+        dd($newTransaction->getSubcategory()->getId()); */
+
+
         $em->persist($newTransaction);
 
         try {

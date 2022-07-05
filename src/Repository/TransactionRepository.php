@@ -40,7 +40,7 @@ class TransactionRepository extends ServiceEntityRepository
         }
     }
 
-    public function transactionsByMonth($user, $obj)
+    public function transactionsList($user, $obj)
     {
         $month = date('m');
         $year = '20' . date('y');
@@ -122,15 +122,8 @@ class TransactionRepository extends ServiceEntityRepository
      * @param [type] $year
      * @return void
      */
-    public function balanceByMonth($user, $month = null, $year = null)
+    public function balance($user, $month, $year)
     {
-        if ($month == null) $month = date('m');
-        if ($year == null) $year = '20' . date('y');
-
-        if ($year !== null && $month !== null) {
-            $year = "and YEAR(created_at) = $year";
-        }
-
         $sql = "SELECT ROUND(SUM(t.balance), 2) as total_balance, count(t.id) as total_count
                 from (
                     select *
@@ -140,7 +133,7 @@ class TransactionRepository extends ServiceEntityRepository
                     and is_seen = true
                     and user_id = :user
                     and status = 1
-                    $year
+                    and year(created_at) = :year
                     union
                     select *
                     from `transaction` t
@@ -149,12 +142,13 @@ class TransactionRepository extends ServiceEntityRepository
                     and is_seen = true
                     and user_id = :user
                     and status = 2
-                    $year
+                    and year(created_at) = :year
                 ) t
         ";
         $conn = $this->getEntityManager()->getConnection();
         $query = $conn->prepare($sql);
         $query->bindValue('month', $month);
+        $query->bindValue('year', $year);
         $query->bindValue('user', $user->getId());
 
         return $query->execute()->fetchAllAssociative();
