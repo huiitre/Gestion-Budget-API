@@ -31,20 +31,10 @@ class TransactionProvider
     
     private $dataUsers = [
         [
-            'username' => 'Yanis',
+            'username' => 'huiitre',
             'mail' => 'a@a.fr',
             'password' => '123456',
-        ],
-        [
-            'username' => 'Audrey',
-            'mail' => 'b@b.fr',
-            'password' => '123456',
-        ],
-        [
-            'username' => 'huiitre',
-            'mail' => 'c@c.fr',
-            'password' => '123456',
-        ],
+        ]
     ];
 
     /* private $balance = [
