@@ -41,9 +41,15 @@ class Category
 
     /**
      * @ORM\OneToMany(targetEntity=Subcategory::class, mappedBy="category", orphanRemoval=true)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories"})
      */
     private $subcategories;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Groups({"get_categories"})
+     */
+    private $slug;
 
     public function __construct()
     {
@@ -117,6 +123,18 @@ class Category
                 $subcategory->setCategory(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
 
         return $this;
     }

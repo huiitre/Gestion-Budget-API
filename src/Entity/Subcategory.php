@@ -13,29 +13,34 @@ use Symfony\Component\Serializer\Annotation\Groups;
  */
 class Subcategory
 {
+    /*
+     * NOTE
+     * Suppression de "get_categories" sur la propriété "transactions" car on en a pas l'utilité
+     */
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users", "get_subcategories"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users", "get_subcategories"})
      */
     private $name;
 
     /**
      * @ORM\Column(type="datetime_immutable")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users", "get_subcategories"})
      */
     private $created_at;
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_categories", "get_transactions", "get_users", "get_subcategories"})
      */
     private $updated_at;
 
@@ -50,9 +55,14 @@ class Subcategory
      * ? on vient ajouter le group categories pour afficher les transactions
      * ? dans les sous catégories, sur la route /api/category/list
      * @ORM\OneToMany(targetEntity=Transaction::class, mappedBy="subcategory")
-     * @Groups({"get_categories"})
      */
     private $transactions;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Groups({"get_categories", "get_transactions", "get_users", "get_subcategories"})
+     */
+    private $slug;
 
     public function __construct()
     {
@@ -138,6 +148,18 @@ class Subcategory
                 $transaction->setSubcategory(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
 
         return $this;
     }

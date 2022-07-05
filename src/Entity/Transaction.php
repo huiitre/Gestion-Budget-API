@@ -5,65 +5,89 @@ namespace App\Entity;
 use App\Repository\TransactionRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ORM\Entity(repositoryClass=TransactionRepository::class)
  */
 class Transaction
 {
+    /*
+     * NOTE
+     * Suppression du group "get_categories" car on a pas besoin des transactions pour la liste des catégories
+     */
+
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_transactions", "get_users"})
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 250,
+     *      minMessage = "Le nom de la transaction doit être supérieur à {{ limit }}",
+     *      maxMessage = "Le nom de la transaction doit être inférieur à {{ limit }}",
+     * )
+     * @Assert\Type("string")
      */
     private $name;
 
     /**
      * @ORM\Column(type="string", length=255)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_transactions", "get_users"})
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 250,
+     *      minMessage = "Le libellé de la transaction doit être supérieur à {{ limit }}",
+     *      maxMessage = "Le libellé de la transaction doit être inférieur à {{ limit }}",
+     * )
+     * @Assert\Type("string")
      */
     private $wording;
 
     /**
      * @ORM\Column(type="float")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_transactions", "get_users"})
+     * @Assert\Type(
+     *      type="float",
+     *      message="La valeur {{ value }} n'est pas un {{ type }} valide"
+     * )
      */
     private $balance;
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $credited_at;
 
     /**
      * @ORM\Column(type="datetime_immutable", nullable=true)
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $debited_at;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $is_fixed;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $is_seen;
 
     /**
      * @ORM\Column(type="boolean")
-     * @Groups({"get_categories", "get_transactions"})
+     * @Groups({"get_transactions", "get_users"})
      */
     private $is_active;
 
@@ -72,9 +96,47 @@ class Transaction
      * ? la sous catégorie de la transaction
      * @ORM\ManyToOne(targetEntity=Subcategory::class, inversedBy="transactions")
      * @ORM\JoinColumn(nullable=false)
-     * @Groups({"get_transactions"})
+     * @Groups({"get_transactions", "get_users"})
+     * @Assert\NotBlank(
+     *      message="Veuillez renseigner une sous catégorie"
+     * )
      */
     private $subcategory;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="transactions")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
+
+    /**
+     * @ORM\Column(type="datetime_immutable")
+     * @Groups({"get_transactions", "get_users"})
+     */
+    private $created_at;
+
+    /**
+     * @ORM\Column(type="datetime_immutable", nullable=true)
+     * @Groups({"get_transactions", "get_users"})
+     */
+    private $updated_at;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     * @Groups({"get_transactions", "get_users"})
+     */
+    private $slug;
+
+    /**
+     * @ORM\Column(type="integer")
+     * @Groups({"get_transactions", "get_users"})
+     */
+    private $status;
+
+    /**
+     * @ORM\OneToOne(targetEntity=TEssence::class, cascade={"persist", "remove"})
+     */
+    private $t_essence;
 
     public function getId(): ?int
     {
@@ -185,6 +247,78 @@ class Transaction
     public function setSubcategory(?Subcategory $subcategory): self
     {
         $this->subcategory = $subcategory;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->created_at;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $created_at): self
+    {
+        $this->created_at = $created_at;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updated_at;
+    }
+
+    public function setUpdatedAt(?\DateTimeImmutable $updated_at): self
+    {
+        $this->updated_at = $updated_at;
+
+        return $this;
+    }
+
+    public function getSlug(): ?string
+    {
+        return $this->slug;
+    }
+
+    public function setSlug(string $slug): self
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    public function getStatus(): ?int
+    {
+        return $this->status;
+    }
+
+    public function setStatus(int $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getTEssence(): ?TEssence
+    {
+        return $this->t_essence;
+    }
+
+    public function setTEssence(?TEssence $t_essence): self
+    {
+        $this->t_essence = $t_essence;
 
         return $this;
     }
