@@ -71,7 +71,6 @@ class UserController extends AbstractController
     public function create(Request $req, EntityManagerInterface $em, SerializerInterface $ser, ValidatorInterface $val, UserPasswordHasherInterface $hasher): Response
     {
         $data = $req->getContent();
-        dd($data);
         try {
             $user = $ser->deserialize($data, User::class, 'json');
         } catch (Exception $e) {
