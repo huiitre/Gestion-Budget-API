@@ -26,7 +26,9 @@ security:
             jwt: ~
 
         # Partie publique de l'api
-        #api_public:
+        # api_public:
+        #     pattern: ^/api
+        #     stateless: true
 
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -47,6 +49,7 @@ security:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/user/signup, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:
