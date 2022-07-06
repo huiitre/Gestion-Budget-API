@@ -29,6 +29,17 @@ class Vehicle
      */
     private $tEssences;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $immat;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=user::class, inversedBy="vehicles")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
+
     public function __construct()
     {
         $this->tEssences = new ArrayCollection();
@@ -77,6 +88,30 @@ class Vehicle
                 $tEssence->setVehicle(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getImmat(): ?string
+    {
+        return $this->immat;
+    }
+
+    public function setImmat(string $immat): self
+    {
+        $this->immat = $immat;
+
+        return $this;
+    }
+
+    public function getUser(): ?user
+    {
+        return $this->user;
+    }
+
+    public function setUser(?user $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

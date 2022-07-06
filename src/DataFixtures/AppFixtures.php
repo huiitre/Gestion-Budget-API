@@ -80,31 +80,6 @@ class AppFixtures extends Fixture
             $manager->persist($month);
         } */
 
-
-        /**
-         *! Ajout des véhicules
-         */
-        $allEntityVehicles = [];
-        foreach ($ep->getDataVehicles() as $value) {
-            $vehicle = new Vehicle();
-            $vehicle->setName($value);
-            $allEntityVehicles[] = $vehicle;
-            $manager->persist($vehicle);
-        }
-
-
-        /**
-         *! Ajout des carburants
-         */
-        $allEntityFuels = [];
-        foreach ($ep->getDataFuels() as $value) {
-            $fuel = new Fuel();
-            $fuel->setName($value);
-            $allEntityFuels[] = $fuel;
-            $manager->persist($fuel);
-        }
-
-
         /**
          *! Ajout des utilisateurs
          */
@@ -122,6 +97,32 @@ class AppFixtures extends Fixture
             $allEntityUsers[] = $user;
 
             $manager->persist($user);
+        }
+
+
+        /**
+         *! Ajout des véhicules
+         */
+        $allEntityVehicles = [];
+        foreach ($ep->getDataVehicles() as $key => $value) {
+            $vehicle = new Vehicle();
+            $vehicle->setName($value['name']);
+            $vehicle->setImmat($value['immat']);
+            $vehicle->setUser($allEntityUsers[0]);
+            $allEntityVehicles[] = $vehicle;
+            $manager->persist($vehicle);
+        }
+
+
+        /**
+         *! Ajout des carburants
+         */
+        $allEntityFuels = [];
+        foreach ($ep->getDataFuels() as $value) {
+            $fuel = new Fuel();
+            $fuel->setName($value);
+            $allEntityFuels[] = $fuel;
+            $manager->persist($fuel);
         }
 
 

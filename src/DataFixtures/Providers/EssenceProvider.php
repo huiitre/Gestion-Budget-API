@@ -5,7 +5,11 @@ namespace App\DataFixtures\Providers;
 class EssenceProvider
 {   
     private $dataVehicles = [
-        'Renault Clio 3 - 1.2 TCE 100 - 2009',
+        [
+            'name' => 'Renault Clio 3 - 1.2 TCE 100 - 2009',
+            'immat' => 'AA385PD'
+        ]
+            
     ];
     
     private $dataFuels = [
