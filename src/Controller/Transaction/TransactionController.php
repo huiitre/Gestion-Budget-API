@@ -100,6 +100,31 @@ class TransactionController extends AbstractController
     }
 
     /**
+     * @Route("/vehicle", name="vehicle")
+     *
+     * @param TransactionRepository $tr
+     * @param Request $req
+     * @return Response
+     */
+    public function showFuelTransactionsList(TransactionRepository $tr, Request $req): Response
+    {
+        $body = $req->getContent();
+        if ($body !== "") {
+            $obj = json_decode($body);
+        } else {
+            $obj = null;
+        }
+
+        $user = $this->getUser();
+
+        $data = $tr->transactionFuelList(
+            $user,
+            $obj
+        );
+
+    }
+
+    /**
      * @Route("/balance/month/{month?}/{year?}", name="balance_by_month")
      *
      * @param TransactionRepository $tr

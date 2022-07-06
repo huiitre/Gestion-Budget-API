@@ -112,6 +112,36 @@ class TransactionRepository extends ServiceEntityRepository
         return $query->execute()->fetchAllAssociative();
     }
 
+    public function transactionFuelList($user, $obj)
+    {
+        $month = date('m');
+        $year = '20' . date('y');
+
+        //* gestion des mois
+        if (!empty($obj->month)) {
+            $month = intval($obj->month);
+        }
+
+        //* gestion des années
+        if (!empty($obj->year)) {
+            $year = intval($obj->year);
+        }
+
+        //* gestion du tri par colonne
+        if (!empty($obj->orderBy) && !empty($obj->order)) {
+            $orderBy = "ORDER BY $obj->orderBy $obj->order";
+        } else {
+            $orderBy = "ORDER BY t.created_at desc";
+        }
+
+        //* gestion du limit/offset
+        if (!empty($obj->limit) && isset($obj->offset)) {
+            $limit = 'LIMIT ' . intval($obj->limit) . ' OFFSET ' . intval($obj->offset);
+        } else {
+            $limit = '';
+        }
+    }
+
     /**
      ** Permet de récupérer la somme sur un mois en particulier de l'année en cours, ou en ajoutant une année en particulier
      * 
