@@ -47,6 +47,8 @@ class AppFixtures extends Fixture
         $this->connexion->executeQuery('TRUNCATE TABLE transaction');
         $this->connexion->executeQuery('TRUNCATE TABLE tessence');
         $this->connexion->executeQuery('TRUNCATE TABLE user');
+        $this->connexion->executeQuery('TRUNCATE TABLE vehicle');
+        $this->connexion->executeQuery('TRUNCATE TABLE fuel');
     }
     
     public function load(ObjectManager $manager)
