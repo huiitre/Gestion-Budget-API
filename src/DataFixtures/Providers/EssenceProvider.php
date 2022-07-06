@@ -8,7 +8,11 @@ class EssenceProvider
         [
             'name' => 'Renault Clio 3 - 1.2 TCE 100 - 2009',
             'immat' => 'AA385PD'
-        ]
+        ],
+        [
+            'name' => 'Ford fiesta - 1.25 82 - 2012',
+            'immat' => 'CB451DY'
+        ],
             
     ];
     

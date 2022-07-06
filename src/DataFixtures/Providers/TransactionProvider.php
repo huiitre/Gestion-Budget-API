@@ -34,7 +34,12 @@ class TransactionProvider
             'username' => 'huiitre',
             'mail' => 'a@a.fr',
             'password' => '123456',
-        ]
+        ],
+        [
+            'username' => 'huiitre2',
+            'mail' => 'b@b.fr',
+            'password' => '123456',
+        ],
     ];
 
     /* private $balance = [

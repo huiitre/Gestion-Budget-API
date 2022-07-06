@@ -6,6 +6,7 @@ use App\Repository\VehicleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 /**
  * @ORM\Entity(repositoryClass=VehicleRepository::class)
@@ -16,11 +17,13 @@ class Vehicle
      * @ORM\Id
      * @ORM\GeneratedValue
      * @ORM\Column(type="integer")
+     * @Groups({"get_vehicle"})
      */
     private $id;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"get_vehicle"})
      */
     private $name;
 
@@ -31,6 +34,7 @@ class Vehicle
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Groups({"get_vehicle"})
      */
     private $immat;
 

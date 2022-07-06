@@ -167,6 +167,7 @@ class TransactionController extends AbstractController
         $data = $req->getContent();
         $user = $this->getUser();
 
+        
 
         try {
             $newTransaction = $serializer->deserialize($data, Transaction::class, 'json');
