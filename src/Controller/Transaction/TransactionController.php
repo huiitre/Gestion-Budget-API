@@ -122,6 +122,11 @@ class TransactionController extends AbstractController
             $obj
         );
 
+        return $this->json(
+            $data,
+            200,
+            []
+        );
     }
 
     /**

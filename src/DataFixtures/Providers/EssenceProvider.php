@@ -6,11 +6,11 @@ class EssenceProvider
 {   
     private $dataVehicles = [
         [
-            'name' => 'Renault Clio 3 - 1.2 TCE 100 - 2009',
+            'name' => 'Renault Clio 3',
             'immat' => 'AA385PD'
         ],
         [
-            'name' => 'Ford fiesta - 1.25 82 - 2012',
+            'name' => 'Ford fiesta',
             'immat' => 'CB451DY'
         ],
             
