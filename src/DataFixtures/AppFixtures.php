@@ -123,6 +123,7 @@ class AppFixtures extends Fixture
         foreach ($ep->getDataFuels() as $value) {
             $fuel = new Fuel();
             $fuel->setName($value);
+            $fuel->setUser($allEntityUsers[0]);
             $allEntityFuels[] = $fuel;
             $manager->persist($fuel);
         }

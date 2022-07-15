@@ -100,13 +100,13 @@ class TransactionController extends AbstractController
     }
 
     /**
-     * @Route("/vehicle", name="vehicle")
+     * @Route("/essence", name="essence_list")
      *
      * @param TransactionRepository $tr
      * @param Request $req
      * @return Response
      */
-    public function showFuelTransactionsList(TransactionRepository $tr, Request $req): Response
+    public function showConsoFuelTransactionsList(TransactionRepository $tr, Request $req): Response
     {
         $body = $req->getContent();
         if ($body !== "") {
@@ -117,7 +117,7 @@ class TransactionController extends AbstractController
 
         $user = $this->getUser();
 
-        $data = $tr->transactionFuelList(
+        $data = $tr->transactionConsoList(
             $user,
             $obj
         );
@@ -221,10 +221,19 @@ class TransactionController extends AbstractController
         $newTransaction->setCreatedAt(new DateTimeImmutable('now'));
         $newTransaction->setUser($user);
 
-        if ($newTransaction->getBalance() > 0) {
+        /* if ($newTransaction->getBalance() > 0) {
             $newTransaction->setStatus(1);
         } else {
             $newTransaction->setStatus(2);
+        } */
+
+        // dd($newTransaction->getSubCategory()->getCategory()->getId());
+
+        if ($newTransaction->getSubCategory()->getCategory()->getId() == 15) {
+            $newTransaction->setStatus(1);
+        } else {
+            $newTransaction->setStatus(2);
+            $newTransaction->setBalance($newTransaction->getBalance() * -1);
         }
 
         /* if ($newTransaction->getSubcategory()->getId() === 40) {

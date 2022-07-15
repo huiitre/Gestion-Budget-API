@@ -112,7 +112,7 @@ class TransactionRepository extends ServiceEntityRepository
         return $query->execute()->fetchAllAssociative();
     }
 
-    public function transactionFuelList($user, $obj)
+    public function transactionConsoList($user, $obj)
     {
         $month = date('m');
         $year = '20' . date('y');

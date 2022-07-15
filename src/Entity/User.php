@@ -60,6 +60,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $transactions;
 
     /**
+     * @ORM\OneToMany(targetEntity=Fuel::class, mappedBy="user", orphanRemoval=true)
+     */
+    private $fuels;
+
+    /**
      * @ORM\OneToMany(targetEntity=Vehicle::class, mappedBy="user", orphanRemoval=true)
      */
     private $vehicles;
@@ -67,6 +72,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->transactions = new ArrayCollection();
+        $this->fuels = new ArrayCollection();
         $this->vehicles = new ArrayCollection();
     }
 
@@ -195,6 +201,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($transaction->getUser() === $this) {
                 $transaction->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Fuel>
+     */
+    public function getFuels(): Collection
+    {
+        return $this->fuels;
+    }
+
+    public function addFuel(Fuel $fuel): self
+    {
+        if (!$this->fuels->contains($fuel)) {
+            $this->fuels[] = $fuel;
+            $fuel->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFuel(Fuel $fuel): self
+    {
+        if ($this->fuels->removeElement($fuel)) {
+            // set the owning side to null (unless already changed)
+            if ($fuel->getUser() === $this) {
+                $fuel->setUser(null);
             }
         }
 
