@@ -68,6 +68,8 @@ class FuelController extends AbstractController
             return $this->json($myJsonError, $myJsonError->getError());
         }
 
+        $newFuel->setUser($user);
+
         $em->persist($newFuel);
 
         try {
