@@ -32,6 +32,12 @@ class Fuel
      */
     private $tEssences;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="fuels")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
+
     public function __construct()
     {
         $this->tEssences = new ArrayCollection();
@@ -80,6 +86,18 @@ class Fuel
                 $tEssence->setFuel(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

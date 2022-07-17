@@ -6,6 +6,7 @@ use App\Entity\Transaction;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\ResultSetMapping;
+use PDO;
 
 /**
  * @extends ServiceEntityRepository<Transaction>
@@ -109,6 +110,71 @@ class TransactionRepository extends ServiceEntityRepository
         $query->bindValue('year', $year);
         $query->bindValue('user', $user->getId());
         
+        return $query->execute()->fetchAllAssociative();
+    }
+
+    public function transactionConsoList($user, $obj)
+    {
+        $month = date('m');
+        $year = '20' . date('y');
+
+        //* gestion des mois
+        if (!empty($obj->month)) {
+            $month = intval($obj->month);
+        }
+
+        //* gestion des années
+        if (!empty($obj->year)) {
+            $year = intval($obj->year);
+        }
+
+        //* gestion du tri par colonne
+        if (!empty($obj->orderBy) && !empty($obj->order)) {
+            $orderBy = "ORDER BY $obj->orderBy $obj->order";
+        } else {
+            $orderBy = "ORDER BY t.created_at desc";
+        }
+
+        //* gestion du limit/offset
+        if (!empty($obj->limit) && isset($obj->offset)) {
+            $limit = 'LIMIT ' . intval($obj->limit) . ' OFFSET ' . intval($obj->offset);
+        } else {
+            $limit = '';
+        }
+
+        $sql = "SELECT
+                    t.id as t_id,
+                    t.name as t_name,
+                    ROUND(t.balance, 2) as t_balance,
+                    t.created_at as t_created_at,
+                    t_e.km_travelled as t_e_km_travelled,
+                    t_e.price_liter as t_e_price_liter,
+                    t_e.tank as t_e_tank,
+                    f.name as f_name,
+                    v.name as v_name,
+                    t_e.tank * t_e.price_liter as balance,
+                    round((t_e.tank * 100) / t_e.km_travelled, 2) as conso
+                from `transaction` t
+                inner join tessence t_e
+                on t.t_essence_id = t_e.id 
+                inner join vehicle v
+                on t_e.vehicle_id = v.id
+                inner join fuel f
+                on t_e.fuel_id = f.id
+                where t.subcategory_id = 40
+                and t.user_id = :user
+                and month(t.created_at) = :month
+                and year(t.created_at) = :year
+                $orderBy
+                $limit
+        ";
+
+        $conn = $this->getEntityManager()->getConnection();
+        $query = $conn->prepare($sql);
+        $query->bindValue('user', $user->getId(), PDO::PARAM_INT);
+        $query->bindValue('month', $month, PDO::PARAM_INT);
+        $query->bindValue('year', $year, PDO::PARAM_INT);
+
         return $query->execute()->fetchAllAssociative();
     }
 
