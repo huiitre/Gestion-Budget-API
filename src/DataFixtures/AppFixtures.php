@@ -190,11 +190,11 @@ class AppFixtures extends Fixture
 
 
         //* ajout des dépenses
-        for ($i = 0; $i < 6; $i++) {
+        for ($i = 0; $i < 500; $i++) {
 
             $transaction = new Transaction();
 
-            $date = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2022-07-01'), date('2022-07-31')));
+            $date = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2021-01-01'), date('2022-12-12')));
 
             $transaction->setName('Essence ' . ($i + 1));
             $transaction->setWording('Essence ' . ($i + 1));
@@ -212,7 +212,7 @@ class AppFixtures extends Fixture
 
             // $transaction->setSubcategory($allEntitySubcategories[mt_rand(0, 111)]);
             $transaction->setSubcategory($allEntitySubcategories[39]);
-            $transaction->setUser($allEntityUsers[0]);
+            $transaction->setUser($allEntityUsers[mt_rand(0, 1)]);
             //! déprécié
             // $transaction->setMonth($allEntityMonths[2]);
             //? 1 étant un ajout au compte, 2 étant un retrait

@@ -6,6 +6,7 @@ use App\Entity\Transaction;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Query\ResultSetMapping;
+use PDO;
 
 /**
  * @extends ServiceEntityRepository<Transaction>
@@ -161,15 +162,18 @@ class TransactionRepository extends ServiceEntityRepository
                 inner join fuel f
                 on t_e.fuel_id = f.id
                 where t.subcategory_id = 40
+                and t.user_id = :user
+                and month(t.created_at) = :month
+                and year(t.created_at) = :year
                 $orderBy
                 $limit
         ";
 
         $conn = $this->getEntityManager()->getConnection();
         $query = $conn->prepare($sql);
-        $query->bindValue('month', $month);
-        $query->bindValue('year', $year);
-        $query->bindValue('user', $user->getId());
+        $query->bindValue('user', $user->getId(), PDO::PARAM_INT);
+        $query->bindValue('month', $month, PDO::PARAM_INT);
+        $query->bindValue('year', $year, PDO::PARAM_INT);
 
         return $query->execute()->fetchAllAssociative();
     }
