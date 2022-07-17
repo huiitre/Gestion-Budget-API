@@ -123,6 +123,7 @@ class AppFixtures extends Fixture
         foreach ($ep->getDataFuels() as $value) {
             $fuel = new Fuel();
             $fuel->setName($value);
+            $fuel->setUser($allEntityUsers[0]);
             $allEntityFuels[] = $fuel;
             $manager->persist($fuel);
         }
@@ -193,11 +194,11 @@ class AppFixtures extends Fixture
 
             $transaction = new Transaction();
 
-            $date = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2019-01-01'), date('2022-12-31')));
+            $date = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2021-01-01'), date('2022-12-12')));
 
-            $transaction->setName($tp->getName());
-            $transaction->setWording($tp->getWording());
-            $transaction->setBalance(mt_rand(-849 * 10, -5 * 10) / 10);
+            $transaction->setName('Essence ' . ($i + 1));
+            $transaction->setWording('Essence ' . ($i + 1));
+            $transaction->setBalance(mt_rand(-120 * 10, -90 * 10) / 10);
             //! déprécié
             // $transaction->setDebitedAt($date);
             //! dépréciés
@@ -209,8 +210,9 @@ class AppFixtures extends Fixture
             //? on va venir se fier à ça dorénavent
             $transaction->setCreatedAt($date);
 
-            $transaction->setSubcategory($allEntitySubcategories[mt_rand(0, 111)]);
-            $transaction->setUser($allEntityUsers[0]);
+            // $transaction->setSubcategory($allEntitySubcategories[mt_rand(0, 111)]);
+            $transaction->setSubcategory($allEntitySubcategories[39]);
+            $transaction->setUser($allEntityUsers[mt_rand(0, 1)]);
             //! déprécié
             // $transaction->setMonth($allEntityMonths[2]);
             //? 1 étant un ajout au compte, 2 étant un retrait
@@ -218,7 +220,7 @@ class AppFixtures extends Fixture
 
             if ($transaction->getSubcategory()->getName() === 'Carburant') {
                 $essence = new TEssence();
-                $essence->setKmTravelled(mt_rand(400, 600));
+                $essence->setKmTravelled(mt_rand(350, 800));
                 $essence->setPriceLiter(mt_rand(1 * 10, 2 * 10) / 10);
                 $essence->setTank(45);
                 $essence->setVehicle($allEntityVehicles[0]);

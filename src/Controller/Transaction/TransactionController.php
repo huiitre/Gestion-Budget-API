@@ -100,6 +100,36 @@ class TransactionController extends AbstractController
     }
 
     /**
+     * @Route("/essence", name="essence_list")
+     *
+     * @param TransactionRepository $tr
+     * @param Request $req
+     * @return Response
+     */
+    public function showConsoFuelTransactionsList(TransactionRepository $tr, Request $req): Response
+    {
+        $body = $req->getContent();
+        if ($body !== "") {
+            $obj = json_decode($body);
+        } else {
+            $obj = null;
+        }
+
+        $user = $this->getUser();
+
+        $data = $tr->transactionConsoList(
+            $user,
+            $obj
+        );
+
+        return $this->json(
+            $data,
+            200,
+            []
+        );
+    }
+
+    /**
      * @Route("/balance/month/{month?}/{year?}", name="balance_by_month")
      *
      * @param TransactionRepository $tr
@@ -191,10 +221,19 @@ class TransactionController extends AbstractController
         $newTransaction->setCreatedAt(new DateTimeImmutable('now'));
         $newTransaction->setUser($user);
 
-        if ($newTransaction->getBalance() > 0) {
+        /* if ($newTransaction->getBalance() > 0) {
             $newTransaction->setStatus(1);
         } else {
             $newTransaction->setStatus(2);
+        } */
+
+        // dd($newTransaction->getSubCategory()->getCategory()->getId());
+
+        if ($newTransaction->getSubCategory()->getCategory()->getId() == 15) {
+            $newTransaction->setStatus(1);
+        } else {
+            $newTransaction->setStatus(2);
+            $newTransaction->setBalance($newTransaction->getBalance() * -1);
         }
 
         /* if ($newTransaction->getSubcategory()->getId() === 40) {
