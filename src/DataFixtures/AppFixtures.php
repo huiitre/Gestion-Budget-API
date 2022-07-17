@@ -196,9 +196,9 @@ class AppFixtures extends Fixture
 
             $date = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2022-07-01'), date('2022-07-31')));
 
-            $transaction->setName($tp->getName());
-            $transaction->setWording($tp->getWording());
-            $transaction->setBalance(mt_rand(-849 * 10, -5 * 10) / 10);
+            $transaction->setName('Essence ' . ($i + 1));
+            $transaction->setWording('Essence ' . ($i + 1));
+            $transaction->setBalance(mt_rand(-120 * 10, -90 * 10) / 10);
             //! déprécié
             // $transaction->setDebitedAt($date);
             //! dépréciés
@@ -220,7 +220,7 @@ class AppFixtures extends Fixture
 
             if ($transaction->getSubcategory()->getName() === 'Carburant') {
                 $essence = new TEssence();
-                $essence->setKmTravelled(mt_rand(400, 600));
+                $essence->setKmTravelled(mt_rand(350, 800));
                 $essence->setPriceLiter(mt_rand(1 * 10, 2 * 10) / 10);
                 $essence->setTank(45);
                 $essence->setVehicle($allEntityVehicles[0]);
