@@ -24,6 +24,9 @@ class VehicleController extends AbstractController
 {
     /**
      * @Route("/list", name="list", methods={"GET"})
+     *
+     * @param VehicleRepository $vr
+     * @return Response
      */
     public function vehicleList(VehicleRepository $vr): Response
     {
