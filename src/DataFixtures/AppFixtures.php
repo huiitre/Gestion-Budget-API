@@ -65,6 +65,14 @@ class AppFixtures extends Fixture
 
 
         /**
+         * ORDRE DES FIXTURES
+         * user
+         * vehicle / fuel
+         * category / subcategory
+         * transaction
+         */
+
+        /**
          * ! Ajout des mois
          */
         /* $allEntityMonths = [];

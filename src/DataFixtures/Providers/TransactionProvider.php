@@ -28,21 +28,7 @@ class TransactionProvider
         'PHIE LA GARENNE69GREZIEU LA V - 210522 CB5256'
     ];
 
-    
-    private $dataUsers = [
-        [
-            'username' => 'huiitre',
-            'mail' => 'a@a.fr',
-            'password' => '123456',
-        ],
-        [
-            'username' => 'huiitre2',
-            'mail' => 'b@b.fr',
-            'password' => '123456',
-        ],
-    ];
-
-    /* private $balance = [
+    private $balance = [
         -12.95,
         -5.94,
         -32.32,
@@ -71,7 +57,7 @@ class TransactionProvider
     private $isActive = [
         true,
         false
-    ]; */
+    ];
 
     /**
      * Get the value of orderName
@@ -90,21 +76,81 @@ class TransactionProvider
     }
 
     /**
-     * Get the value of dataUsers
+     * Get the value of balance
      */ 
-    public function getDataUsers()
+    public function getBalance()
     {
-        return $this->dataUsers;
+        return $this->balance;
     }
 
     /**
-     * Set the value of dataUsers
+     * Set the value of balance
      *
      * @return  self
      */ 
-    public function setDataUsers($dataUsers)
+    public function setBalance($balance)
     {
-        $this->dataUsers = $dataUsers;
+        $this->balance = $balance;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of isFixed
+     */ 
+    public function getIsFixed()
+    {
+        return $this->isFixed;
+    }
+
+    /**
+     * Set the value of isFixed
+     *
+     * @return  self
+     */ 
+    public function setIsFixed($isFixed)
+    {
+        $this->isFixed = $isFixed;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of isSeen
+     */ 
+    public function getIsSeen()
+    {
+        return $this->isSeen;
+    }
+
+    /**
+     * Set the value of isSeen
+     *
+     * @return  self
+     */ 
+    public function setIsSeen($isSeen)
+    {
+        $this->isSeen = $isSeen;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of isActive
+     */ 
+    public function getIsActive()
+    {
+        return $this->isActive;
+    }
+
+    /**
+     * Set the value of isActive
+     *
+     * @return  self
+     */ 
+    public function setIsActive($isActive)
+    {
+        $this->isActive = $isActive;
 
         return $this;
     }

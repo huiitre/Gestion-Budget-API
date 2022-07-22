@@ -4,7 +4,7 @@ namespace App\DataFixtures\Providers;
 
 class CategoryProvider
 {
-    private $dataCategories = [
+    private $categories = [
         'Achats & Shopping' => [
             'Achats & Shopping - Autres',
             'Cadeaux',
@@ -165,21 +165,21 @@ class CategoryProvider
     ];
 
     /**
-     * Get the value of dataCategories
+     * Get the value of Categories
      */ 
-    public function getDataCategories()
+    public function getCategories()
     {
-        return $this->dataCategories;
+        return $this->categories;
     }
 
     /**
-     * Set the value of dataCategories
+     * Set the value of Categories
      *
      * @return  self
      */ 
-    public function setDataCategories($dataCategories)
+    public function setCategories($categories)
     {
-        $this->dataCategories = $dataCategories;
+        $this->categories = $categories;
 
         return $this;
     }
