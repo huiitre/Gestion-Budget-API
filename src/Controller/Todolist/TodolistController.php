@@ -3,9 +3,10 @@
 namespace App\Controller\Todolist;
 
 use App\Repository\TodolistRepository;
+use App\Repository\TodoRepository;
 use Symfony\Component\Routing\Annotation\Route;
-use App\Repository\VehicleRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -18,12 +19,34 @@ class TodolistController extends AbstractController
      *
      * @return Response
      */
-    public function showList(TodolistRepository $tlr): Response
+    public function showTodolist(TodolistRepository $tlr): Response
     {
         $user = $this->getUser();
 
+        $data = $tlr->showTodolist($user);
+
         return $this->json(
-            'salut salut',
+            $data,
+            200,
+            []
+        );
+    }
+
+    /**
+     * @Route("/{id}/todos", name="todos", methods={"GET"})
+     *
+     * @param TodoRepository $tr
+     * @param Request $req
+     * @return Response
+     */
+    public function showTodosByList(TodoRepository $tr, $id): Response
+    {
+        $user = $this->getUser();
+
+        $data = $tr->showTodos($user, $id);
+
+        return $this->json(
+            $data,
             200,
             []
         );

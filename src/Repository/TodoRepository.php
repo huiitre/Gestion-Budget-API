@@ -39,6 +39,25 @@ class TodoRepository extends ServiceEntityRepository
         }
     }
 
+    public function showTodos($user, $id)
+    {
+        $sql = "SELECT t.*
+                from todo t 
+                where todolist_id in (
+                    select t2.id 
+                    from todolist t2 
+                    where t2.user_id = :user
+                )
+                and todolist_id = :list
+        ";
+        $conn = $this->getEntityManager()->getConnection();
+        $query = $conn->prepare($sql);
+        $query->bindValue('list', $id);
+        $query->bindValue('user', $user->getId());
+
+        return $query->executeQuery()->fetchAllAssociative();
+    }
+
 //    /**
 //     * @return Todo[] Returns an array of Todo objects
 //     */

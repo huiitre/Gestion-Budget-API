@@ -18,6 +18,7 @@ class CategoryFixtures extends Fixture implements FixtureGroupInterface
     private $connexion;
     private $slugger;
 
+    public const CATEGORY_REFERENCE = 'category_';
     public const SUBCATEGORY_REFERENCE = 'subcategory_';
 
     public function __construct(Connection $connexion, SluggerInterface $slugger)
@@ -37,6 +38,7 @@ class CategoryFixtures extends Fixture implements FixtureGroupInterface
     {
         return [
             'all',
+            'todo'
         ];
     }
 
@@ -48,7 +50,8 @@ class CategoryFixtures extends Fixture implements FixtureGroupInterface
 
         $categoryProvider = new CategoryProvider();
 
-        $count = 1;
+        $countCategory = 1;
+        $countSubcategory = 1;
         foreach ($categoryProvider->getCategories() as $key => $value) {
             
             $category = new Category();
@@ -62,14 +65,16 @@ class CategoryFixtures extends Fixture implements FixtureGroupInterface
                 $subCategory->setSlug($this->slugger->slug($val));
                 $subCategory->setCreatedAt($now);
                 
-                $this->addReference(self::SUBCATEGORY_REFERENCE . $count, $subCategory);
+                $this->addReference(self::SUBCATEGORY_REFERENCE . $countSubcategory, $subCategory);
 
                 $manager->persist($subCategory);
                 $category->addSubcategory($subCategory);
                 // dump(array_keys($categoryProvider->getCategories()));
                 
-                $count++;
+                $countSubcategory++;
             }
+            $this->addReference(self::CATEGORY_REFERENCE . $countCategory, $category);
+            $countCategory++;
             $manager->persist($category);
         }
         $manager->flush();

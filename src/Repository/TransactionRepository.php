@@ -110,7 +110,7 @@ class TransactionRepository extends ServiceEntityRepository
         $query->bindValue('year', $year);
         $query->bindValue('user', $user->getId());
         
-        return $query->execute()->fetchAllAssociative();
+        return $query->executeQuery()->fetchAllAssociative();
     }
 
     public function transactionConsoList($user, $obj)
@@ -175,7 +175,7 @@ class TransactionRepository extends ServiceEntityRepository
         $query->bindValue('month', $month, PDO::PARAM_INT);
         $query->bindValue('year', $year, PDO::PARAM_INT);
 
-        return $query->execute()->fetchAllAssociative();
+        return $query->executeQuery()->fetchAllAssociative();
     }
 
     /**
@@ -217,7 +217,7 @@ class TransactionRepository extends ServiceEntityRepository
         $query->bindValue('year', $year);
         $query->bindValue('user', $user->getId());
 
-        return $query->execute()->fetchAllAssociative();
+        return $query->executeQuery()->fetchAllAssociative();
     }
 
     /**
@@ -306,7 +306,7 @@ class TransactionRepository extends ServiceEntityRepository
         $query->bindValue('year', $year);
         $query->bindValue('user', $user->getId());
 
-        return $query->execute()->fetchAllAssociative();
+        return $query->executeQuery()->fetchAllAssociative();
     }
 
     /**
@@ -373,7 +373,7 @@ class TransactionRepository extends ServiceEntityRepository
         $query->bindValue('year', $year);
         $query->bindValue('user', $user->getId());
 
-        return $query->execute()->fetchAllAssociative();
+        return $query->executeQuery()->fetchAllAssociative();
     }
 
     public function deleteTransaction($user, $array)

@@ -39,6 +39,32 @@ class TodolistRepository extends ServiceEntityRepository
         }
     }
 
+    /**
+     * Récupère les todolist de l'utilisateur
+     *
+     * @param [type] $user
+     * @return void
+     */
+    public function showTodolist($user)
+    {
+        $sql = "SELECT t.*,
+                    c.name as category,
+                    (select count(t2.id) from todo t2 where todolist_id = t.id) as todos,
+                    (select count(t2.id) from todo t2 where todolist_id = t.id and t2.percent != 100 ) as activesTodos,
+                    (select count(t2.id) from todo t2 where todolist_id = t.id and t2.percent = 100) as donesTodos
+                from todolist t
+                inner join category c 
+                on t.category_id = c.id
+                where user_id = 1
+                order by t.created_at desc
+        ";
+        $conn = $this->getEntityManager()->getConnection();
+        $query = $conn->prepare($sql);
+        $query->bindValue('user', $user->getId());
+
+        return $query->executeQuery()->fetchAllAssociative();
+    }
+
 //    /**
 //     * @return Todolist[] Returns an array of Todolist objects
 //     */
