@@ -1,8 +1,12 @@
 ```sql
 select * from subcategory s ;
+
 select * from category c ;
+
 select * from todolist t ;
-select * from todo t where todolist_id = 2;
+-- delete from todolist ;
+select * from todo t where todolist_id = 50;
+
 select * from `transaction` t ;
 
 -- Liste des todolist
@@ -21,5 +25,38 @@ order by t.created_at desc;
 select t.*
 from todo t 
 where todolist_id = 1
-order by created_at desc;
+order by created_at asc;
+
+-- Liste des todos d'une liste en fonction de l'user courant
+select t.*
+from todo t 
+where todolist_id in (
+	select t2.id 
+	from todolist t2 
+	where t2.user_id = 1
+)
+and todolist_id = 2
+
+-- Insertion d'une todolist
+insert into todolist 
+(name, category_id, user_id, is_done, percent, created_at) values ("premiere liste", 4, 1, false, 0, now());
+
+call createTodolist("ma première procédure bordel !!", 4, 1, null, null, null);
+
+-- Suppression d'une todolist avec ces todo
+delete from todo
+where todolist_id = (
+	select t2.id
+	from todolist t2
+	where t2.id = 1
+	and t2.user_id = 3
+);
+
+call deleteTodolist(4, 2);
+
+-- Création d'un todo
+insert into todo 
+(name, todolist_id, created_at, is_done, percent) values ('test 1', 50, now(), false, 0);
+
+call createTodo('test dans dbeaver', 1, now(), false, 0, 50);
 ```

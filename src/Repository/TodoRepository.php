@@ -76,6 +76,34 @@ class TodoRepository extends ServiceEntityRepository
         return $query->executeStatement();
     }
 
+    public function deleteTodo($ids, $user, $list)
+    {
+        $countArray = count($ids);
+
+        $conn = $this->getEntityManager()->getConnection();
+        $conn->beginTransaction();
+
+        $count = 0;
+        foreach ($ids as $value) {
+            $sql = "CALL deleteTodo(:list, :user, :todo)";
+            $query = $conn->prepare($sql);
+            $query->bindValue('list', $list, PDO::PARAM_INT);
+            $query->bindValue('user', $user->getId(), PDO::PARAM_INT);
+            $query->bindValue('todo', $value, PDO::PARAM_INT);
+
+            if ($query->executeStatement() == 1)
+                $count++;
+        }
+
+        if ($countArray == $count) {
+            $conn->commit();
+            return $count;
+        } else {
+            $conn->rollback();
+            return 0;
+        }
+    }
+
 //    /**
 //     * @return Todo[] Returns an array of Todo objects
 //     */

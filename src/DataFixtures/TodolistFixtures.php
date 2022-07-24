@@ -50,7 +50,7 @@ class TodolistFixtures extends Fixture implements FixtureGroupInterface
         $todosNotDone = [];
         $allTodos = [];
 
-        for ($i = 1; $i < 3; $i++) {
+        for ($i = 1; $i < 15; $i++) {
             $date = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2022-01-01'), date('2022-12-12')));
 
             $list = new Todolist();
@@ -59,7 +59,7 @@ class TodolistFixtures extends Fixture implements FixtureGroupInterface
             $list->setCategory($this->getReference(CategoryFixtures::CATEGORY_REFERENCE . mt_rand(1, 14)));
             $list->setUser($this->getReference(UserFixtures::USER_REFERENCE . mt_rand(0, 2)));
 
-            for ($j = 1; $j < mt_rand(5, 12); $j++) {
+            for ($j = 1; $j < mt_rand(5, 30); $j++) {
                 $date2 = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2022-01-01'), date('2022-12-12')));
 
                 $todo = new Todo();

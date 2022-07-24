@@ -205,7 +205,66 @@ class TodolistController extends AbstractController
             $status = 0;
         }
 
+        if ($status == 0)
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
+
         if ($tlr->deleteTodolist($data->ids, $user) > 0) {
+            $msg->setMsg('La suppression a bien été effectué');
+            $status = 1;
+            return $this->json(
+                ['msg' => $msg->getMsg(), 'status' => $status],
+                200,
+                []
+            );
+        } else {
+            $msg->setMsg('Erreur lors de la suppression');
+            $status = 0;
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    /**
+     * Suppression d'un todo d'une liste
+     * 
+     * @Route("/delete/todo", name="delete_todo", methods={"DELETE"})
+     *
+     * @param Request $req
+     * @param MessageResponse $msg
+     * @param TodoRepository $tr
+     * @return void
+     */
+    public function deleteTodo(Request $req, MessageResponse $msg, TodoRepository $tr)
+    {
+        $user = $this->getUser();
+        $data = $req->getContent();
+        $status = 1;
+        
+        //* on vérifie si c'est un objet
+        if (empty($data)) {
+            $msg->setMsg('Objet invalide');
+            $status = 0;
+        }
+        
+        //* on sérialise l'objet
+        $data = json_decode($data);
+
+        //* on vérifie si l'objet est rempli, si c'est un array, et que ce dernier ne soit pas vide
+        if (empty($data) || !is_array($data->ids) || empty($data->ids)) {
+            $msg->setMsg('Il faut sélectionner au moins un todo');
+            $status = 0;
+        }
+
+        //* si vide ou non integer
+        if (empty($data->list) || !is_integer($data->list)) {
+            $msg->setMsg('La todolist n\'est pas renseigné');
+            $status = 0;
+        }
+
+        //* si status à 0 on return les erreurs
+        if ($status == 0)
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        if ($tr->deleteTodo($data->ids, $user, $data->list) > 0) {
             $msg->setMsg('La suppression a bien été effectué');
             $status = 1;
             return $this->json(
