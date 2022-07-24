@@ -34,7 +34,7 @@ class TodolistFixtures extends Fixture implements FixtureGroupInterface
     public static function getGroups(): array
     {
         return [
-            'all',
+            // 'all',
             'todo'
         ];
     }
@@ -50,7 +50,7 @@ class TodolistFixtures extends Fixture implements FixtureGroupInterface
         $todosNotDone = [];
         $allTodos = [];
 
-        for ($i = 1; $i < 12; $i++) {
+        for ($i = 1; $i < 3; $i++) {
             $date = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2022-01-01'), date('2022-12-12')));
 
             $list = new Todolist();

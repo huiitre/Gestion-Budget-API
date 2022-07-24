@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Todolist;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use PDO;
 
 /**
  * @extends ServiceEntityRepository<Todolist>
@@ -63,6 +64,48 @@ class TodolistRepository extends ServiceEntityRepository
         $query->bindValue('user', $user->getId());
 
         return $query->executeQuery()->fetchAllAssociative();
+    }
+
+    public function createTodolist($list, $user)
+    {
+        $sql = "CALL createTodolist(:name, :category, :user, :is_done, :percent, :created_at)";
+        $conn = $this->getEntityManager()->getConnection();
+        $query = $conn->prepare($sql);
+        $query->bindValue('name', $list->getName(), PDO::PARAM_STR);
+        $query->bindValue('category', $list->getCategory()->getId(), PDO::PARAM_INT);
+        $query->bindValue('user', $user->getId(), PDO::PARAM_INT);
+        $query->bindValue('is_done', $list->isIsDone(), PDO::PARAM_BOOL);
+        $query->bindValue('percent', $list->getPercent(), PDO::PARAM_INT);
+        $query->bindValue('created_at', $list->getCreatedAt());
+
+        return $query->executeStatement();
+    }
+
+    public function deleteTodolist($ids, $user)
+    {
+        $countArray = count($ids);
+
+        $conn = $this->getEntityManager()->getConnection();
+        $conn->beginTransaction();
+
+        $count = 0;
+        foreach ($ids as $value) {
+            $sql = "CALL deleteTodolist(:id, :user)";
+            $query = $conn->prepare($sql);
+            $query->bindValue('id', $value, PDO::PARAM_INT);
+            $query->bindValue('user', $user->getId(), PDO::PARAM_INT);
+            
+            if ($query->executeStatement() == 1)
+                $count++;
+        }
+
+        if ($countArray == $count) {
+            $conn->commit();
+            return $count;
+        } else {
+            $conn->rollback();
+            return 0;
+        }
     }
 
 //    /**

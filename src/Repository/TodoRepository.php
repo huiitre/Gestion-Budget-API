@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Todo;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use PDO;
 
 /**
  * @extends ServiceEntityRepository<Todo>
@@ -56,6 +57,23 @@ class TodoRepository extends ServiceEntityRepository
         $query->bindValue('user', $user->getId());
 
         return $query->executeQuery()->fetchAllAssociative();
+    }
+
+    public function createTodo($user, $todo)
+    {
+        $sql = "CALL createTodo(:name, :user, :created_at, :is_done, :percent, :list_id)
+        ";
+        $conn = $this->getEntityManager()->getConnection();
+
+        $query = $conn->prepare($sql);
+        $query->bindValue('name', $todo->getName(), PDO::PARAM_STR);
+        $query->bindValue('user', $user->getId(), PDO::PARAM_INT);
+        $query->bindValue('created_at', $todo->getCreatedAt());
+        $query->bindValue('is_done', $todo->isIsDone(), PDO::PARAM_BOOL);
+        $query->bindValue('list_id', $todo->getTodolist()->getId(), PDO::PARAM_INT);
+        $query->bindValue('percent', $todo->getPercent(), PDO::PARAM_INT);
+
+        return $query->executeStatement();
     }
 
 //    /**
