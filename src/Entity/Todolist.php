@@ -61,6 +61,21 @@ class Todolist
      */
     private $name;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $allTodos;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $activeTodos;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $doneTodos;
+
     public function __construct()
     {
         $this->todos = new ArrayCollection();
@@ -181,6 +196,42 @@ class Todolist
     public function setName(string $name): self
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getAllTodos(): ?int
+    {
+        return $this->allTodos;
+    }
+
+    public function setAllTodos(int $allTodos): self
+    {
+        $this->allTodos = $allTodos;
+
+        return $this;
+    }
+
+    public function getActiveTodos(): ?int
+    {
+        return $this->activeTodos;
+    }
+
+    public function setActiveTodos(int $activeTodos): self
+    {
+        $this->activeTodos = $activeTodos;
+
+        return $this;
+    }
+
+    public function getDoneTodos(): ?int
+    {
+        return $this->doneTodos;
+    }
+
+    public function setDoneTodos(int $doneTodos): self
+    {
+        $this->doneTodos = $doneTodos;
 
         return $this;
     }
