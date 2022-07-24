@@ -61,6 +61,7 @@ class TodoRepository extends ServiceEntityRepository
 
     public function createTodo($user, $todo)
     {
+        dd($todo);
         $sql = "CALL createTodo(:name, :user, :created_at, :is_done, :percent, :list_id)
         ";
         $conn = $this->getEntityManager()->getConnection();
