@@ -1,20 +1,16 @@
-```sql
 select * from subcategory s ;
 
 select * from category c ;
 
 select * from todolist t ;
 -- delete from todolist ;
-select * from todo t where todolist_id = 50;
+select * from todo t where todolist_id = 15;
 
 select * from `transaction` t ;
 
 -- Liste des todolist
 select t.*,
-c.name as category,
-(select count(t2.id) from todo t2 where todolist_id = t.id) as todos,
-(select count(t2.id) from todo t2 where todolist_id = t.id and t2.percent != 100 ) as activesTodos,
-(select count(t2.id) from todo t2 where todolist_id = t.id and t2.percent = 100) as donesTodos
+c.name as category
 from todolist t
 inner join category c 
 on t.category_id = c.id
@@ -35,13 +31,13 @@ where todolist_id in (
 	from todolist t2 
 	where t2.user_id = 1
 )
-and todolist_id = 2
+and todolist_id = 15
 
 -- Insertion d'une todolist
 insert into todolist 
 (name, category_id, user_id, is_done, percent, created_at) values ("premiere liste", 4, 1, false, 0, now());
 
-call createTodolist("ma première procédure bordel !!", 4, 1, null, null, null);
+call createTodolist("ma première procédure bordel !!", 4, 1, null, null, null, null, null, null);
 
 -- Suppression d'une todolist avec ces todo
 delete from todo
@@ -58,5 +54,28 @@ call deleteTodolist(4, 2);
 insert into todo 
 (name, todolist_id, created_at, is_done, percent) values ('test 1', 50, now(), false, 0);
 
-call createTodo('test dans dbeaver', 1, now(), false, 0, 50);
-```
+
+call createTodo('test dans dbeaver', 1, now(), false, 50, 15);
+
+-- Suppression d'un todo d'une liste
+delete from todo 
+where todolist_id = (
+	select t2.id
+	from todolist t2
+	where t2.id = 1
+	and t2.user_id = 1
+)
+and id = 2;
+
+call deleteTodo(9, 1, 69);
+
+
+-- procédure qui recalcul une liste
+call calculTodolistByTodo(15);
+select id, all_todos, active_todos, done_todos from todolist t ;
+
+-- Modification d'une liste
+update todolist
+set (name, category_id) values ('test 1 update', category)
+where id = 124
+and user_id = 1;

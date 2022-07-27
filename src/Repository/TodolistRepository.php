@@ -49,10 +49,7 @@ class TodolistRepository extends ServiceEntityRepository
     public function showTodolist($user)
     {
         $sql = "SELECT t.*,
-                    c.name as category,
-                    (select count(t2.id) from todo t2 where todolist_id = t.id) as todos,
-                    (select count(t2.id) from todo t2 where todolist_id = t.id and t2.percent != 100 ) as activesTodos,
-                    (select count(t2.id) from todo t2 where todolist_id = t.id and t2.percent = 100) as donesTodos
+                    c.name as category
                 from todolist t
                 inner join category c 
                 on t.category_id = c.id
@@ -68,7 +65,8 @@ class TodolistRepository extends ServiceEntityRepository
 
     public function createTodolist($list, $user)
     {
-        $sql = "CALL createTodolist(:name, :category, :user, :is_done, :percent, :created_at)";
+        $sql = "CALL createTodolist(:name, :category, :user, :is_done, :percent, :created_at, :all_todos, :active_todos, :done_todos)";
+
         $conn = $this->getEntityManager()->getConnection();
         $query = $conn->prepare($sql);
         $query->bindValue('name', $list->getName(), PDO::PARAM_STR);
@@ -77,6 +75,9 @@ class TodolistRepository extends ServiceEntityRepository
         $query->bindValue('is_done', $list->isIsDone(), PDO::PARAM_BOOL);
         $query->bindValue('percent', $list->getPercent(), PDO::PARAM_INT);
         $query->bindValue('created_at', $list->getCreatedAt());
+        $query->bindValue('all_todos', $list->getAllTodos(), PDO::PARAM_INT);
+        $query->bindValue('active_todos', $list->getActiveTodos(), PDO::PARAM_INT);
+        $query->bindValue('done_todos', $list->getDoneTodos(), PDO::PARAM_INT);
 
         return $query->executeStatement();
     }
@@ -106,6 +107,21 @@ class TodolistRepository extends ServiceEntityRepository
             $conn->rollback();
             return 0;
         }
+    }
+
+    public function updateTodolist($user, $list)
+    {
+        $sql = "CALL updateTodolist(:id, :user, :name, :category)";
+
+        $conn = $this->getEntityManager()->getConnection();
+
+        $query = $conn->prepare($sql);
+        $query->bindValue('id', $list->id, PDO::PARAM_INT);
+        $query->bindValue('user', $user->getId(), PDO::PARAM_INT);
+        $query->bindValue('name', $list->name, PDO::PARAM_STR);
+        $query->bindValue('category', $list->category, PDO::PARAM_INT);
+
+        return $query->executeStatement();
     }
 
 //    /**

@@ -47,8 +47,9 @@ class TodolistFixtures extends Fixture implements FixtureGroupInterface
 
         $now = new DateTimeImmutable('now');
 
-        $todosNotDone = [];
-        $allTodos = [];
+        $todosNotDone = 0;
+        $allTodos = 0;
+        $todosDone = 0;
 
         for ($i = 1; $i < 15; $i++) {
             $date = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2022-01-01'), date('2022-12-12')));
@@ -59,7 +60,7 @@ class TodolistFixtures extends Fixture implements FixtureGroupInterface
             $list->setCategory($this->getReference(CategoryFixtures::CATEGORY_REFERENCE . mt_rand(1, 14)));
             $list->setUser($this->getReference(UserFixtures::USER_REFERENCE . mt_rand(0, 2)));
 
-            for ($j = 1; $j < mt_rand(5, 30); $j++) {
+            for ($j = 1; $j < mt_rand(5, 15); $j++) {
                 $date2 = DateTimeImmutable::createFromMutable($faker->dateTimeBetween(date('2022-01-01'), date('2022-12-12')));
 
                 $todo = new Todo();
@@ -69,17 +70,29 @@ class TodolistFixtures extends Fixture implements FixtureGroupInterface
                 $todo->setPercent($todo->isIsDone() == true ? 100 : mt_rand(0, 99));
                 $todo->setTodolist($list);
 
-                if ($todo->isIsDone() == false)
-                    $todosNotDone[] = $todo;
+                if ($todo->isIsDone() == false) {
+                    $todosNotDone++;
+                } else {
+                    $todosDone++;
+                }
 
-                $allTodos[] = $todo;
+                $allTodos++;
                 $manager->persist($todo);
             }
             // (montant partiel / montant total) x 100
-            $list->setPercent((count($todosNotDone) / count($allTodos)) * 100);
+            $list->setPercent(($todosDone * 100) / $allTodos);
             $list->setIsDone($list->getPercent() == 100 ? true : false);
 
+            $list->setAllTodos($allTodos);
+            $list->setActiveTodos($todosNotDone);
+            $list->setDoneTodos($todosDone);
+
             $manager->persist($list);
+
+            //* on reset les compteurs à zero
+            $todosNotDone = 0;
+            $allTodos = 0;
+            $todosDone = 0;
         }
         $manager->flush();
     }

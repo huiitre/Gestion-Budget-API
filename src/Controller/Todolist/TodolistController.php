@@ -88,19 +88,19 @@ class TodolistController extends AbstractController
 
         //* si l'objet n'existe pas, on retourne direct une réponse
         try {
-            $list = $serializer->deserialize($data, Todolist::class, 'json');
+            $todo = $serializer->deserialize($data, Todolist::class, 'json');
         } catch (Exception $e) {
             return new JsonResponse(['msg' => ['Objet invalide'], 'status' => 0], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         //* vérification du nom
-        if (is_null($list->getName()) || $list->getName() == "") {
+        if (is_null($todo->getName()) || $todo->getName() == "") {
             array_push($arrayMsg['msg'], 'Le nom de la liste est vide');
             $status = 0;
         }
         
         //* vérification de la catégorie
-        if (is_null($list->getCategory()) || $list->getCategory()->getId() == "") {
+        if (is_null($todo->getCategory()) || $todo->getCategory()->getId() == "") {
             array_push($arrayMsg['msg'], 'La catégorie est vide');
             $status = 0;
         }
@@ -110,7 +110,7 @@ class TodolistController extends AbstractController
             return new JsonResponse(['msg' => $arrayMsg['msg'], 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
 
         //* on appelle la base
-        if ($tlr->createTodolist($list, $user) == 1) {
+        if ($tlr->createTodolist($todo, $user) == 1) {
             array_push($arrayMsg['msg'], 'Ajout effectué');
             return $this->json(
                 ['msg' => $arrayMsg['msg'], 'status' => 1],
@@ -254,11 +254,12 @@ class TodolistController extends AbstractController
             $status = 0;
         }
 
-        //* si vide ou non integer
+        //? on gère ça avec une transaction qui nous récupère l'id de la liste
+        /* //* si vide ou non integer
         if (empty($data->list) || !is_integer($data->list)) {
             $msg->setMsg('La todolist n\'est pas renseigné');
             $status = 0;
-        }
+        } */
 
         //* si status à 0 on return les erreurs
         if ($status == 0)
@@ -276,6 +277,133 @@ class TodolistController extends AbstractController
             $msg->setMsg('Erreur lors de la suppression');
             $status = 0;
             return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    /**
+     * Modification d'une liste
+     * 
+     * @Route("/update/list", name="update_list", methods={"PATCH"})
+     *
+     * @param Request $req
+     * @param TodolistRepository $tlr
+     * @param SerializerInterface $serializer
+     * @param MessageResponse $msg
+     * @return void
+     */
+    public function updateTodolist(
+        Request $req,
+        TodolistRepository $tlr,
+        MessageResponse $msg
+    )
+    {
+        $data = $req->getContent();
+        $user = $this->getUser();
+        $status = 1;
+
+        //* on vérifie si c'est un objet
+        if (empty($data)) {
+            $msg->setMsg('Objet invalide');
+            $status = 0;
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        //* on sérialise l'objet
+        $todo = json_decode($data);
+
+        //* vérification du nom
+        if (empty($todo->name) || !is_string($todo->name)) {
+            $msg->setMsg('Le nom de la liste est vide');
+            $status = 0;
+        }
+
+        //* vérification de la catégorie
+        if (empty($todo->category) || !intval($todo->category)) {
+            $msg->setMsg('La catégorie est vide');
+            $status = 0;
+        }
+
+        //* vérification de l'id
+        if (empty($todo->id) || !intval($todo->id)) {
+            $msg->setMsg('Veuillez sélectionner une liste');
+            $status = 0;
+        }
+        
+        //* si le status est à 0, on retourne une erreur avec les différents messages
+        if ($status == 0)
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        if ($tlr->updateTodolist($user, $todo) > 0) {
+            $msg->setMsg('La modification a bien été effectué');
+            return $this->json(
+                ['msg' => $msg->getMsg(), 'status' => 1],
+                200,
+                []
+            );
+        } else {
+            $msg->setMsg('Erreur lors de la modification');
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => 0], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+    }
+
+    /**
+     * Modification d'un todo
+     * 
+     * @Route("/update/todo", name="update_todo", methods={"PATCH"})
+     *
+     * @param Request $req
+     * @param TodoRepository $tr
+     * @param MessageResponse $msg
+     * @return void
+     */
+    public function updateTodo(
+        Request $req,
+        TodoRepository $tr,
+        MessageResponse $msg
+    )
+    {
+        $data = $req->getContent();
+        $user = $this->getUser();
+        $status = 1;
+
+        //* on vérifie si c'est un objet
+        if (empty($data))
+            return new JsonResponse(['msg' => $msg->setMsg('Objet invalide'), 'status' => 0], Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        //* on sérialise l'objet
+        $todo = json_decode($data);
+
+        //* vérification du nom
+        if (empty($todo->name) || !is_string($todo->name)) {
+            $msg->setMsg('Le nom de la liste est vide');
+            $status = 0;
+        }
+
+        //* vérification de l'id du todo
+        if (empty($todo->id) || !intval($todo->id)) {
+            $msg->setMsg('Veuillez sélectionner une liste');
+            $status = 0;
+        }
+
+        //* vérification du pourcentage
+        if (empty($todo->percent) || !intval($todo->percent)) {
+            $msg->setMsg('Le pourcentage est vide');
+            $status = 0;
+        }
+
+        if ($status == 0)
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        if ($tr->updateTodo($user, $todo) > 0) {
+            $msg->setMsg('La modification a bien été effectué');
+            return $this->json(
+                ['msg' => $msg->getMsg(), 'status' => 1],
+                200,
+                []
+            );
+        } else {
+            $msg->setMsg('Erreur lors de la modification');
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => 0], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
     }
 }
