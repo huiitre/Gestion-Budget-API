@@ -64,7 +64,7 @@ class TodoRepository extends ServiceEntityRepository
         $ok = 1;
 
         //* on check si l'user est le bon
-        $ok = $this->checkUserTodolist($todo, $user);
+        $ok = $this->checkUserTodolist($todo->getTodolist()->getId(), $user);
 
         if ($ok) {
             $conn = $this->getEntityManager()->getConnection();
@@ -125,6 +125,13 @@ class TodoRepository extends ServiceEntityRepository
     {
         //* On récupère l'id de la liste
         $list_id = $this->getTodolistByTodo($todo->id);
+        if (!$list_id)
+            return 0;
+
+        //* on vérifie que l'user a les droits
+        $ok = $this->checkUserTodolist(intval($list_id), $user->getId());
+        if (!$ok)
+            return 0;
 
         //* on update
         $sql = "CALL updateTodo(:todo_id, :name, :percent, :user)";
@@ -134,44 +141,12 @@ class TodoRepository extends ServiceEntityRepository
         $query->bindValue('name', $todo->name, PDO::PARAM_STR);
         $query->bindValue('percent', $todo->percent, PDO::PARAM_INT);
         $query->bindValue('user', $user->getId(), PDO::PARAM_INT);
-        $ok = $query->executeStatement();
+        $query->executeStatement();
 
         //* on recalcul la liste APRES L EXECUTION DE LA PRECEDENTE REQUETE
         $this->calculTodolistByTodo($list_id);
 
-        return $ok;
-    }
-
-    public function checkUserTodolist($todo, $user)
-    {
-        $conn = $this->getEntityManager()->getConnection();
-        //todo Vérification de la liste et de l'utilisateur
-        $sql = "CALL checkUserTodolist(:list_id, :user)";
-        $qry = $conn->prepare($sql);
-        $qry->bindValue('list_id', $todo->getTodolist()->getId(), PDO::PARAM_INT);
-        $qry->bindValue('user', $user->getId(), PDO::PARAM_INT);
-
-        return $qry->executeStatement();
-    }
-
-    public function calculTodolistByTodo($id)
-    {
-        $conn = $this->getEntityManager()->getConnection();
-        //* requête de recalcul de la todolist
-        $sql = "CALL calculTodolistByTodo(:list_id)";
-        //* recalcul todolist
-        $qry = $conn->prepare($sql);
-        $qry->bindValue('list_id', $id, PDO::PARAM_INT);
-        return $qry->executeStatement();
-    }
-
-    public function getTodolistByTodo($id)
-    {
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = "CALL getTodolistByTodo(:id)";
-        $qry = $conn->prepare($sql);
-        $qry->bindValue('id', $id, PDO::PARAM_INT);
-        return $qry->executeQuery()->fetchOne();
+        return 1;
     }
 
 //    /**

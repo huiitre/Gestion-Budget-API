@@ -111,6 +111,11 @@ class TodolistRepository extends ServiceEntityRepository
 
     public function updateTodolist($user, $list)
     {
+        //* vérification de l'user
+        $ok = $this->checkUserTodolist($list->id, $user->getId());
+        if (!$ok)
+            return 0;
+        
         $sql = "CALL updateTodolist(:id, :user, :name, :category)";
 
         $conn = $this->getEntityManager()->getConnection();
@@ -120,8 +125,9 @@ class TodolistRepository extends ServiceEntityRepository
         $query->bindValue('user', $user->getId(), PDO::PARAM_INT);
         $query->bindValue('name', $list->name, PDO::PARAM_STR);
         $query->bindValue('category', $list->category, PDO::PARAM_INT);
+        $query->executeStatement();
 
-        return $query->executeStatement();
+        return 1;
     }
 
 //    /**
