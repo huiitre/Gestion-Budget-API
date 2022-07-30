@@ -162,7 +162,7 @@ class TodolistController extends AbstractController
         }
 
         if ($status == 0)
-            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], 200);
 
         if ($tr->createTodo($user, $todo) > 0) {
             $msg->setMsg('Ajout effectué');
@@ -263,7 +263,7 @@ class TodolistController extends AbstractController
 
         //* si status à 0 on return les erreurs
         if ($status == 0)
-            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], 200);
 
         if ($tr->deleteTodo($data->ids, $user, $data->list) > 0) {
             $msg->setMsg('La suppression a bien été effectué');
@@ -276,7 +276,7 @@ class TodolistController extends AbstractController
         } else {
             $msg->setMsg('Erreur lors de la suppression');
             $status = 0;
-            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], 200);
         }
     }
 
@@ -368,7 +368,7 @@ class TodolistController extends AbstractController
 
         //* on vérifie si c'est un objet
         if (empty($data))
-            return new JsonResponse(['msg' => $msg->setMsg('Objet invalide'), 'status' => 0], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(['msg' => $msg->setMsg('Objet invalide'), 'status' => 0], 200);
 
         //* on sérialise l'objet
         $todo = json_decode($data);
@@ -386,13 +386,13 @@ class TodolistController extends AbstractController
         }
 
         //* vérification du pourcentage
-        if (empty($todo->percent) || !intval($todo->percent)) {
+        if (!isset($todo->percent)) {
             $msg->setMsg('Le pourcentage est vide');
             $status = 0;
         }
 
         if ($status == 0)
-            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => $status], 200);
 
         if ($tr->updateTodo($user, $todo) > 0) {
             $msg->setMsg('La modification a bien été effectué');
@@ -403,7 +403,7 @@ class TodolistController extends AbstractController
             );
         } else {
             $msg->setMsg('Erreur lors de la modification');
-            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => 0], Response::HTTP_UNPROCESSABLE_ENTITY);
+            return new JsonResponse(['msg' => $msg->getMsg(), 'status' => 0], 200);
         }
     }
 }

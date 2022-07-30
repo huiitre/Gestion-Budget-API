@@ -42,14 +42,25 @@ class TodoRepository extends ServiceEntityRepository
 
     public function showTodos($user, $id)
     {
-        $sql = "SELECT t.*
-                from todo t 
-                where todolist_id in (
-                    select t2.id 
-                    from todolist t2 
-                    where t2.user_id = :user
-                )
+        $sql = "SELECT
+                    t.*, c.name as category
+                from
+                    todo t
+                left outer join todolist t3
+                on t3.id = t.todolist_id 
+                left outer join category c 
+                on c.id = t3.category_id 
+                where
+                    todolist_id in (
+                        select
+                            t2.id
+                        from
+                            todolist t2
+                        where
+                            t2.user_id = :user
+                    )
                 and todolist_id = :list
+                order by t.created_at desc
         ";
         $conn = $this->getEntityManager()->getConnection();
         $query = $conn->prepare($sql);
@@ -64,7 +75,7 @@ class TodoRepository extends ServiceEntityRepository
         $ok = 1;
 
         //* on check si l'user est le bon
-        $ok = $this->checkUserTodolist($todo->getTodolist()->getId(), $user);
+        $ok = $this->checkUserTodolist($todo->getTodolist()->getId(), $user->getId());
 
         if ($ok) {
             $conn = $this->getEntityManager()->getConnection();
