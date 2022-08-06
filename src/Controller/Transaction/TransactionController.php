@@ -80,7 +80,7 @@ class TransactionController extends AbstractController
 
         $month = !empty($obj->month) ? $obj->month : date('m');
         $year = !empty($obj->year) ? $obj->year : '20' . date('y');
-        $count = $tr->balance($user, $month, $year);
+        $count = $tr->balance($user, $monthURI, $yearURI);
 
         //? créer un service (fonction) qui va gérer le next et previous url plus tard
         if (!empty($obj->limit) && isset($obj->offset)) {
