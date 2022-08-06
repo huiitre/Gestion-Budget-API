@@ -52,6 +52,16 @@ class TransactionController extends AbstractController
      */
     public function showTransactionsList(TransactionRepository $tr, Request $req): Response
     {
+        $monthURI = intval($req->query->get('month'));
+        $yearURI = intval($req->query->get('year'));
+
+        if (!$monthURI)
+            $monthURI = date('m');
+
+        if (!$yearURI)
+            $yearURI = '20' . date('y');
+        
+        //TODO A REFACTORISER EN PARAM D URL 
         $body = $req->getContent();
         if ($body !== "") {
             $obj = json_decode($body);
@@ -63,7 +73,9 @@ class TransactionController extends AbstractController
 
         $data = $tr->transactionsList(
             $user,
-            $obj
+            $obj,
+            $monthURI,
+            $yearURI
         );
 
         $month = !empty($obj->month) ? $obj->month : date('m');

@@ -41,7 +41,7 @@ class TransactionRepository extends ServiceEntityRepository
         }
     }
 
-    public function transactionsList($user, $obj)
+    public function transactionsList($user, $obj, $monthURI, $yearURI)
     {
         $month = date('m');
         $year = '20' . date('y');
@@ -106,8 +106,8 @@ class TransactionRepository extends ServiceEntityRepository
         ";
         $conn = $this->getEntityManager()->getConnection();
         $query = $conn->prepare($sql);
-        $query->bindValue('month', $month);
-        $query->bindValue('year', $year);
+        $query->bindValue('month', $monthURI);
+        $query->bindValue('year', $yearURI);
         $query->bindValue('user', $user->getId());
         
         return $query->executeQuery()->fetchAllAssociative();
