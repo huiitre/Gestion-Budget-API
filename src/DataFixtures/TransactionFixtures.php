@@ -81,7 +81,7 @@ class TransactionFixtures extends Fixture implements FixtureGroupInterface, Depe
 
         
         //* ajout des dépenses
-        for ($i = 0; $i < 500; $i++) {
+        for ($i = 0; $i < 5000; $i++) {
 
             $transaction = new Transaction();
 

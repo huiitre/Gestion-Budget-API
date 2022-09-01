@@ -142,6 +142,25 @@ class TransactionController extends AbstractController
     }
 
     /**
+     * @Route("/essence/all", name="all_essence_list")
+     *
+     * @param TransactionRepository $tr
+     * @param Request $req
+     * @return Response
+     */
+    public function showAllConsoFuelTransactionsList(TransactionRepository $tr, Request $req): Response
+    {
+        $user = $this->getUser();
+        $data = $tr->allTransactionConsoList($user);
+
+        return $this->json(
+            $data,
+            200,
+            []
+        );
+    }
+
+    /**
      * @Route("/balance/month/{month?}/{year?}", name="balance_by_month")
      *
      * @param TransactionRepository $tr

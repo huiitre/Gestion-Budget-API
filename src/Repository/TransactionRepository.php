@@ -178,6 +178,40 @@ class TransactionRepository extends ServiceEntityRepository
         return $query->executeQuery()->fetchAllAssociative();
     }
 
+    public function allTransactionConsoList($user)
+    {
+        $sql = "SELECT
+                    t.id as t_id,
+                    t.name as t_name,
+                    ROUND(t.balance, 2) as t_balance,
+                    -- t.created_at as t_created_at,
+                    date_format(t.created_at, '%d - %c - %y') as t_created_at,
+                    t_e.km_travelled as t_e_km_travelled,
+                    t_e.price_liter as t_e_price_liter,
+                    t_e.tank as t_e_tank,
+                    f.name as f_name,
+                    v.name as v_name,
+                    t_e.tank * t_e.price_liter as balance,
+                    round((t_e.tank * 100) / t_e.km_travelled, 2) as conso
+                from `transaction` t
+                inner join tessence t_e
+                on t.t_essence_id = t_e.id
+                inner join vehicle v
+                on t_e.vehicle_id = v.id
+                inner join fuel f
+                on t_e.fuel_id = f.id
+                where t.subcategory_id = 40
+                and t.user_id = :user
+                order by t.created_at desc
+        ";
+
+        $conn = $this->getEntityManager()->getConnection();
+        $query = $conn->prepare($sql);
+        $query->bindValue('user', $user->getId(), PDO::PARAM_INT);
+
+        return $query->executeQuery()->fetchAllAssociative();
+    }
+
     /**
      ** Permet de récupérer la somme sur un mois en particulier de l'année en cours, ou en ajoutant une année en particulier
      * 
